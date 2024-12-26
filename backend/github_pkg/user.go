@@ -13,7 +13,7 @@ import (
 /*
 get users and link them up to one of the active teams
 */
-func GetUsers(ctx context.Context, c *github.Client, owner string, refresh bool) ([]*CustomUser, error) {
+func GetUsers(ctx context.Context, c *github.Client, owner string) ([]*CustomUser, error) {
 
 	listMembersOpt := &github.ListMembersOptions{
 		ListOptions: github.ListOptions{PerPage: 100},
@@ -128,8 +128,4 @@ func writeUsers(users map[string]*CustomUser) error {
 	db_pkg.Write("users", jsonData)
 
 	return nil
-}
-
-func readUsers() (map[string]*CustomUser, error) {
-
 }

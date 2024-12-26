@@ -12,14 +12,17 @@ import (
 func main() {
 	ctx := context.Background()
 
-	config, client := github_pkg.InitGithubConnection(ctx)
+	client, owner, repo, err := github_pkg.InitGithubConnection(ctx)
+	if err != nil {
+		log.Fatalln("Could not start up github connection: ", err.Error())
+	}
 
 	// GETS
 	http.HandleFunc("/config/hello_go", web_pkg.HelloGo)
-	http.HandleFunc("/config/get_repos", web_pkg.GetRepos(ctx, client, config.Owner))
-	http.HandleFunc("/config/get_teams", web_pkg.GetTeams(ctx, client, config.Owner))
-	http.HandleFunc("/config/get_members", web_pkg.GetMembers(ctx, client, config.Owner))
-	http.HandleFunc("/dashboard/get_pr_list", web_pkg.GetPrList(ctx, client, config.Owner, config.Repo))
+	http.HandleFunc("/config/get_repos", web_pkg.GetRepos(ctx, client, owner))
+	http.HandleFunc("/config/get_teams", web_pkg.GetTeams(ctx, client, owner))
+	http.HandleFunc("/config/get_members", web_pkg.GetMembers(ctx, client, owner))
+	http.HandleFunc("/dashboard/get_pr_list", web_pkg.GetPrList(ctx, client, owner, repo))
 
 	// POSTS
 	http.HandleFunc("/config/set_teams", web_pkg.SetTeams)

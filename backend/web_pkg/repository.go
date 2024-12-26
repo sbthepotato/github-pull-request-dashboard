@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v68/github"
 )
 
 func GetRepos(ctx context.Context, c *github.Client, owner string) http.HandlerFunc {

@@ -3,10 +3,11 @@ package web_pkg
 import (
 	"context"
 	"encoding/json"
+	"github-pull-request-dashboard/github_pkg"
 	"net/http"
 	"time"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v68/github"
 )
 
 func GetMembers(ctx context.Context, c *github.Client, owner string) http.HandlerFunc {
@@ -22,14 +23,14 @@ func GetMembers(ctx context.Context, c *github.Client, owner string) http.Handle
 
 		if refresh == "y" {
 			last_fetched_members = time.Now()
-			cached_members, err = gh_get_members(ctx, c, owner)
+			cached_members, err = github_pkg.GetUsers(ctx, c, owner)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
 		} else if currentTime.Sub(last_fetched_members).Hours() < 1 || (len(cached_members) == 0) {
-			cached_members = make([]*CustomUser, 0)
+			cached_members = make([]*github_pkg.CustomUser, 0)
 			users, err := read_users()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)

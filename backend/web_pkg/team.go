@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v68/github"
 )
 
 func GetTeams(ctx context.Context, c *github.Client, owner string) http.HandlerFunc {

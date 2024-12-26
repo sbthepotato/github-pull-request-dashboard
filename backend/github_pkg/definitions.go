@@ -6,12 +6,6 @@ import (
 	"github.com/google/go-github/v68/github"
 )
 
-type Config struct {
-	Token string `json:"token,omitempty"`
-	Owner string `json:"owner,omitempty"`
-	Repo  string `json:"repo,omitempty"`
-}
-
 /*
 repository with enabled field
 */

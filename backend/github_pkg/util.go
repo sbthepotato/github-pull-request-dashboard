@@ -2,44 +2,27 @@ package github_pkg
 
 import (
 	"context"
-	"encoding/json"
-	"log"
 	"os"
 
 	"golang.org/x/oauth2"
 
 	"github.com/google/go-github/v68/github"
+	"github.com/joho/godotenv"
 )
 
-func InitGithubConnection(ctx context.Context) (*Config, *github.Client) {
-	config := loadEnv()
-
-	authToken := config.Token
+func InitGithubConnection(ctx context.Context) (*github.Client, string, string, error) {
+	err := godotenv.Load()
+	if err != nil {
+		return nil, "", "", err
+	}
 
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: authToken},
+		&oauth2.Token{AccessToken: os.Getenv("token")},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 
 	client := github.NewClient(tc)
 
-	config.Token = ""
+	return client, os.Getenv("user"), os.Getenv("repo"), nil
 
-	return config, client
-
-}
-
-func loadEnv() *Config {
-	content, err := os.ReadFile("./db/config.json")
-	if err != nil {
-		log.Fatal("Error when opening config: ", err)
-	}
-
-	var payload Config
-	err = json.Unmarshal(content, &payload)
-	if err != nil {
-		log.Fatal("Error during Unmarshal of config: ", err)
-	}
-
-	return &payload
 }
