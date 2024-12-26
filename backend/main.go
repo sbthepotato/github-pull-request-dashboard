@@ -4,25 +4,28 @@ import (
 	"context"
 	"log"
 	"net/http"
+
+	"github-pull-request-dashboard/github_pkg"
+	"github-pull-request-dashboard/web_pkg"
 )
 
 func main() {
 	ctx := context.Background()
 
-	config, client := init_github_connection(ctx)
+	config, client := github_pkg.InitGithubConnection(ctx)
 
 	// GETS
-	http.HandleFunc("/config/hello_go", hello_go)
-	http.HandleFunc("/config/get_repos", get_repos(ctx, client, config.Owner))
-	http.HandleFunc("/config/get_teams", get_teams(ctx, client, config.Owner))
-	http.HandleFunc("/config/get_members", get_members(ctx, client, config.Owner))
-	http.HandleFunc("/dashboard/get_pr_list", get_pr_list(ctx, client, config.Owner, config.Repo))
+	http.HandleFunc("/config/hello_go", web_pkg.HelloGo)
+	http.HandleFunc("/config/get_repos", web_pkg.GetRepos(ctx, client, config.Owner))
+	http.HandleFunc("/config/get_teams", web_pkg.GetTeams(ctx, client, config.Owner))
+	http.HandleFunc("/config/get_members", web_pkg.GetMembers(ctx, client, config.Owner))
+	http.HandleFunc("/dashboard/get_pr_list", web_pkg.GetPrList(ctx, client, config.Owner, config.Repo))
 
 	// POSTS
-	http.HandleFunc("/config/set_teams", set_teams)
-	http.HandleFunc("/config/set_repos", set_repos)
+	http.HandleFunc("/config/set_teams", web_pkg.SetTeams)
+	http.HandleFunc("/config/set_repos", web_pkg.SetRepos)
 
-	cors_handler := enable_cors(http.DefaultServeMux)
+	cors_handler := web_pkg.EnableCors(http.DefaultServeMux)
 
 	// Start the server on port 8080
 	log.Println("Starting server on :8080...")

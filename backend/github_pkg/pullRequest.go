@@ -1,4 +1,4 @@
-package main
+package github_pkg
 
 import (
 	"context"
@@ -13,191 +13,9 @@ import (
 )
 
 /*
-get all repositories for the currently set org
-*/
-func gh_get_repos(ctx context.Context, c *github.Client, owner string) ([]*CustomRepo, error) {
-
-	opt := &github.RepositoryListByOrgOptions{
-		Sort:        "full_name",
-		ListOptions: github.ListOptions{PerPage: 100},
-	}
-
-	var all_repos []*github.Repository
-
-	for {
-		repos, resp, err := c.Repositories.ListByOrg(ctx, owner, opt)
-		if err != nil {
-			return nil, err
-		}
-
-		all_repos = append(all_repos, repos...)
-		if resp.NextPage == 0 {
-			break
-		}
-		opt.Page = resp.NextPage
-
-	}
-
-	var custom_repos []*CustomRepo
-
-	for _, repo := range all_repos {
-		custom_repo := new(CustomRepo)
-
-		custom_repo.Repository = repo
-		custom_repos = append(custom_repos, custom_repo)
-
-	}
-
-	return custom_repos, nil
-}
-
-/*
-get members and link them up to one of the active teams
-*/
-func gh_get_members(ctx context.Context, c *github.Client, owner string) ([]*CustomUser, error) {
-
-	listMembersOpt := &github.ListMembersOptions{
-		ListOptions: github.ListOptions{PerPage: 100},
-	}
-
-	var allUsers []*github.User
-
-	for {
-		users, resp, err := c.Organizations.ListMembers(ctx, owner, listMembersOpt)
-		if err != nil {
-			return nil, err
-		}
-
-		allUsers = append(allUsers, users...)
-
-		if resp.NextPage == 0 {
-			break
-		}
-		listMembersOpt.Page = resp.NextPage
-	}
-
-	teams, err := read_teams(true)
-	if err != nil {
-		return nil, err
-	}
-
-	userTeams := make(map[string]*CustomTeam)
-
-	// find team members of each team in org and add it to a map
-	for _, team := range teams {
-
-		if team.ReviewEnabled == nil || !*team.ReviewEnabled {
-			continue
-		}
-
-		teamMembersOpt := &github.TeamListTeamMembersOptions{
-			ListOptions: github.ListOptions{PerPage: 100},
-		}
-
-		var teamMembers []*github.User
-
-		for {
-			respMembers, resp, err := c.Teams.ListTeamMembersBySlug(ctx, owner, *team.Slug, teamMembersOpt)
-			if err != nil {
-				return nil, err
-			}
-
-			teamMembers = append(teamMembers, respMembers...)
-
-			if resp.NextPage == 0 {
-				break
-			}
-			teamMembersOpt.Page = resp.NextPage
-		}
-
-		for _, teamUser := range teamMembers {
-			userTeams[*teamUser.Login] = team
-		}
-	}
-
-	var wg sync.WaitGroup
-	userChannel := make(chan *CustomUser)
-
-	// go through all org members to get extended user info, also add team info
-	for _, member := range allUsers {
-		wg.Add(1)
-		go processUser(userChannel, &wg, ctx, c, *member.Login, userTeams)
-	}
-
-	go func() {
-		wg.Wait()
-		close(userChannel)
-	}()
-
-	userMap := make(map[string]*CustomUser)
-	customUsers := make([]*CustomUser, 0)
-
-	for processedUser := range userChannel {
-		userMap[*processedUser.Login] = processedUser
-		customUsers = append(customUsers, processedUser)
-	}
-
-	write_users(userMap)
-
-	return customUsers, nil
-}
-
-/*
-process a member into the member channel
-*/
-func processUser(userChannel chan<- *CustomUser, wg *sync.WaitGroup, ctx context.Context, c *github.Client, login string, teams map[string]*CustomTeam) {
-	defer wg.Done()
-
-	user, _, err := c.Users.Get(ctx, login)
-	if err != nil {
-		log.Println("error fetching user", login, err)
-	}
-
-	customUser := new(CustomUser)
-	customUser.User = user
-	customUser.Team = teams[*user.Login]
-
-	userChannel <- customUser
-}
-
-/*
-get list of all teams for a given organisation
-*/
-func gh_get_teams(ctx context.Context, c *github.Client, owner string) ([]*CustomTeam, error) {
-
-	opt := &github.ListOptions{
-		PerPage: 100,
-	}
-
-	teams, _, err := c.Teams.ListTeams(ctx, owner, opt)
-	if err != nil {
-		return nil, err
-	}
-
-	customTeams := make([]*CustomTeam, 0)
-	teamMap := make(map[string]*CustomTeam)
-	defaultReview := false
-	defaultOrder := 0
-
-	for _, team := range teams {
-		customTeam := new(CustomTeam)
-		customTeam.Team = team
-		customTeam.ReviewEnabled = &defaultReview
-		customTeam.ReviewOrder = &defaultOrder
-
-		teamMap[*team.Slug] = customTeam
-		customTeams = append(customTeams, customTeam)
-	}
-
-	write_teams(teamMap, false)
-
-	return customTeams, nil
-}
-
-/*
 get list of github pull requests and process them with review information
 */
-func gh_get_pr_list(ctx context.Context, c *github.Client, owner string, repo string, prevResult *PullRequestInfo) (*PullRequestInfo, error) {
+func GetPullRequests(ctx context.Context, c *github.Client, owner string, repo string, prevResult *PullRequestInfo) (*PullRequestInfo, error) {
 
 	if prevResult == nil {
 		prevResult = new(PullRequestInfo)
@@ -231,12 +49,12 @@ func gh_get_pr_list(ctx context.Context, c *github.Client, owner string, repo st
 		opts.Page = resp.NextPage
 	}
 
-	users, err := read_users()
+	users, err := readUsers()
 	if err != nil {
 		return nil, err
 	}
 
-	teams, err := read_teams(true)
+	teams, err := readTeams()
 	if err != nil {
 		return nil, err
 	}
@@ -251,7 +69,7 @@ func gh_get_pr_list(ctx context.Context, c *github.Client, owner string, repo st
 		}
 
 		wg.Add(1)
-		go process_pr(PrChannel, &wg, ctx, c, owner, repo, pr, users, teams, idx)
+		go processPullRequest(PrChannel, &wg, ctx, c, owner, repo, pr, users, teams, idx)
 		idx++ // manual index as we are skipping draft
 	}
 
@@ -261,7 +79,7 @@ func gh_get_pr_list(ctx context.Context, c *github.Client, owner string, repo st
 	if teams != nil {
 		slugs := make([]string, 0, len(teams))
 
-		for slug := range teams {
+		for _, slug := range teams {
 			slugs = append(slugs, slug)
 		}
 
@@ -309,7 +127,7 @@ func gh_get_pr_list(ctx context.Context, c *github.Client, owner string, repo st
 /*
 Process a pull request into the pull request channel
 */
-func process_pr(PrChannel chan<- *CustomPullRequest, wg *sync.WaitGroup, ctx context.Context, c *github.Client, owner string, repo string, pr *github.PullRequest, users map[string]*CustomUser, teams map[string]*CustomTeam, idx int) {
+func processPullRequest(PrChannel chan<- *CustomPullRequest, wg *sync.WaitGroup, ctx context.Context, c *github.Client, owner string, repo string, pr *github.PullRequest, users map[string]*CustomUser, teams map[string]*CustomTeam, idx int) {
 
 	defer wg.Done()
 

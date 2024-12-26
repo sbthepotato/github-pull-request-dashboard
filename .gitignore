@@ -1,8 +1,5 @@
 # private
-config.json
-backend/db/*
 *.exe
-
 
 # Logs
 logs

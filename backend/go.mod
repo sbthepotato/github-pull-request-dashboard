@@ -1,4 +1,4 @@
-module gh-pull-request-dashboard
+module github-pull-request-dashboard
 
 go 1.23.4
 
