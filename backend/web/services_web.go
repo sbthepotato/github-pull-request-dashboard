@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"sync"
 	"time"
 
-	"github.com/google/go-github/v67/github"
+	"github.com/google/go-github/v68/github"
 )
 
 var mu sync.Mutex
@@ -21,6 +22,8 @@ var cached_members []*CustomUser
 
 var last_fetched_prs time.Time
 var cached_prs *PullRequestInfo
+
+var cachedPrListResults map[string]*PullRequestInfo
 
 func hello_go(w http.ResponseWriter, r *http.Request) {
 	setHeaders(&w, "text")
@@ -247,7 +250,7 @@ func get_members(ctx context.Context, c *github.Client, owner string) http.Handl
 	}
 }
 
-func get_pr_list(ctx context.Context, c *github.Client, owner string, repo string) http.HandlerFunc {
+func get_pr_list(ctx context.Context, c *github.Client, owner string, defaultRepo string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		mu.Lock()
@@ -257,20 +260,27 @@ func get_pr_list(ctx context.Context, c *github.Client, owner string, repo strin
 		refresh := r.URL.Query().Get("refresh")
 		currentTime := time.Now()
 
-		if currentTime.Sub(last_fetched_prs).Minutes() > 5 || (refresh == "y" && currentTime.Sub(last_fetched_prs).Minutes() > 2) {
+		repo := r.URL.Query().Get("repo")
+		if repo == "" {
+			repo = defaultRepo
+		}
+
+		log.Println("repo: ", repo)
+
+		if currentTime.Sub(last_fetched_prs).Minutes() > 5 || (refresh == "y" && currentTime.Sub(last_fetched_prs).Seconds() > 2) {
 			cached_prs = new(PullRequestInfo)
 
-			prs, err := gh_get_pr_list(ctx, c, owner, repo)
+			prs, err := gh_get_pr_list(ctx, c, owner, repo, cachedPrListResults[repo])
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			cached_prs = prs
+			cachedPrListResults[repo] = prs
 			last_fetched_prs = time.Now()
 		}
 
-		jsonData, err := json.Marshal(cached_prs)
+		jsonData, err := json.Marshal(cachedPrListResults[repo])
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

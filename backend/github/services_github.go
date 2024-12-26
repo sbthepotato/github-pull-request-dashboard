@@ -7,8 +7,9 @@ import (
 	"sort"
 	"strconv"
 	"sync"
+	"time"
 
-	"github.com/google/go-github/v67/github"
+	"github.com/google/go-github/v68/github"
 )
 
 /*
@@ -196,7 +197,17 @@ func gh_get_teams(ctx context.Context, c *github.Client, owner string) ([]*Custo
 /*
 get list of github pull requests and process them with review information
 */
-func gh_get_pr_list(ctx context.Context, c *github.Client, owner string, repo string) (*PullRequestInfo, error) {
+func gh_get_pr_list(ctx context.Context, c *github.Client, owner string, repo string, prevResult *PullRequestInfo) (*PullRequestInfo, error) {
+
+	if prevResult == nil {
+		prevResult = new(PullRequestInfo)
+	}
+
+	if prevResult.Updated == nil {
+		prevResult.Updated = &time.Time{}
+	}
+
+	log.Println("time ", *prevResult.Updated)
 
 	opts := &github.PullRequestListOptions{
 		State:       "open",
@@ -288,6 +299,8 @@ func gh_get_pr_list(ctx context.Context, c *github.Client, owner string, repo st
 	}
 
 	result.PullRequests = prs
+	currentTime := time.Now()
+	result.Updated = &currentTime
 
 	return result, nil
 

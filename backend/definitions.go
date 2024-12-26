@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/google/go-github/v67/github"
+	"github.com/google/go-github/v68/github"
 )
 
 /*
@@ -71,7 +71,7 @@ type PullRequestInfo struct {
 	PullRequests []*CustomPullRequest `json:"pull_requests,omitempty"`
 	ReviewTeams  []*CustomTeam        `json:"review_teams,omitempty"`
 	Users        []*CustomUser        `json:"users,omitempty"`
-	Updated      *time.Time           `json:"-"`
+	Updated      *time.Time           `json:"updated,omitempty"`
 }
 
 /*
