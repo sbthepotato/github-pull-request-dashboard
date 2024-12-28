@@ -8,10 +8,12 @@ import (
 	"net/http"
 	"time"
 
+	"github-pull-request-dashboard/db_pkg"
+
 	"github.com/google/go-github/v68/github"
 )
 
-var cachedPrListResults map[string]*github_pkg.PullRequestInfo
+var cachedPrListResults map[string]*db_pkg.PullRequestInfo
 
 func GetPrList(ctx context.Context, c *github.Client, owner string, defaultRepo string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

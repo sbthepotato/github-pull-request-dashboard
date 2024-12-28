@@ -2,6 +2,7 @@ package github_pkg
 
 import (
 	"context"
+	"github-pull-request-dashboard/db_pkg"
 
 	"github.com/google/go-github/v68/github"
 )
@@ -9,7 +10,7 @@ import (
 /*
 get all repositories for the currently set org
 */
-func GetRepositories(ctx context.Context, c *github.Client, owner string) ([]*CustomRepo, error) {
+func GetRepositories(ctx context.Context, c *github.Client, owner string) ([]*db_pkg.Repository, error) {
 
 	opt := &github.RepositoryListByOrgOptions{
 		Sort:        "full_name",
@@ -32,14 +33,13 @@ func GetRepositories(ctx context.Context, c *github.Client, owner string) ([]*Cu
 
 	}
 
-	var custom_repos []*CustomRepo
+	var custom_repos []*db_pkg.Repository
 
 	for _, repo := range all_repos {
-		custom_repo := new(CustomRepo)
-
+		custom_repo := new(db_pkg.Repository)
 		custom_repo.Repository = repo
+		db_pkg.CreateRepository(ctx, custom_repo)
 		custom_repos = append(custom_repos, custom_repo)
-
 	}
 
 	return custom_repos, nil

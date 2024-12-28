@@ -3,6 +3,7 @@ package web_pkg
 import (
 	"context"
 	"encoding/json"
+	"github-pull-request-dashboard/db_pkg"
 	"github-pull-request-dashboard/github_pkg"
 	"net/http"
 	"time"
@@ -30,7 +31,7 @@ func GetMembers(ctx context.Context, c *github.Client, owner string) http.Handle
 			}
 
 		} else if currentTime.Sub(last_fetched_members).Hours() < 1 || (len(cached_members) == 0) {
-			cached_members = make([]*github_pkg.CustomUser, 0)
+			cached_members = make([]*db_pkg.User, 0)
 			users, err := read_users()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -5,12 +5,18 @@ import (
 	"log"
 	"net/http"
 
+	"github-pull-request-dashboard/db_pkg"
 	"github-pull-request-dashboard/github_pkg"
 	"github-pull-request-dashboard/web_pkg"
 )
 
 func main() {
 	ctx := context.Background()
+
+	err := db_pkg.InitDatabase(ctx)
+	if err != nil {
+		log.Fatalln("Could not start the database: ", err.Error())
+	}
 
 	client, owner, repo, err := github_pkg.InitGithubConnection(ctx)
 	if err != nil {

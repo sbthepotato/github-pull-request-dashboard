@@ -3,9 +3,12 @@ package web_pkg
 import (
 	"context"
 	"encoding/json"
+	"github-pull-request-dashboard/db_pkg"
 	"io"
 	"net/http"
 	"time"
+
+	"github-pull-request-dashboard/github_pkg"
 
 	"github.com/google/go-github/v68/github"
 )
@@ -23,7 +26,7 @@ func GetTeams(ctx context.Context, c *github.Client, owner string) http.HandlerF
 		currentTime := time.Now()
 
 		if refresh == "y" {
-			cached_teams, err = gh_get_teams(ctx, c, owner)
+			cached_teams, err = github_pkg.GetTeams(ctx, c, owner)
 
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -75,7 +78,7 @@ func SetTeams(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	team_data := make([]SetTeam, 0)
-	cached_teams = make([]*CustomTeam, 0)
+	cached_teams = make([]*db_pkg.Team, 0)
 
 	err = json.Unmarshal(body, &team_data)
 	if err != nil {
@@ -89,7 +92,7 @@ func SetTeams(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	active_team_map := make(map[string]*CustomTeam)
+	active_team_map := make(map[string]*db_pkg.Team)
 
 	for _, team := range team_data {
 		*team_map[team.Slug].ReviewEnabled = team.ReviewEnabled

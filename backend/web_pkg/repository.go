@@ -3,20 +3,22 @@ package web_pkg
 import (
 	"context"
 	"encoding/json"
+	"github-pull-request-dashboard/db_pkg"
+	"github-pull-request-dashboard/github_pkg"
 	"io"
 	"net/http"
 
 	"github.com/google/go-github/v68/github"
 )
 
-func GetRepos(ctx context.Context, c *github.Client, owner string) http.HandlerFunc {
+func GetRepositories(ctx context.Context, c *github.Client, owner string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		setHeaders(&w, "json")
 
 		mu.Lock()
 		defer mu.Unlock()
 
-		repos, err := gh_get_repos(ctx, c, owner)
+		repos, err := github_pkg.GetRepositories(ctx, c, owner)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -34,55 +36,45 @@ func GetRepos(ctx context.Context, c *github.Client, owner string) http.HandlerF
 	}
 }
 
-func SetRepos(w http.ResponseWriter, r *http.Request) {
-	setHeaders(&w, "text")
+func SetRepos(ctx context.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 
-	mu.Lock()
-	defer mu.Unlock()
+		setHeaders(&w, "text")
 
-	if r.Method != http.MethodPost {
-		http.Error(w, "invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
+		mu.Lock()
+		defer mu.Unlock()
 
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Failed to read request body", http.StatusBadRequest)
-		return
-	}
+		if r.Method != http.MethodPost {
+			http.Error(w, "invalid request method", http.StatusMethodNotAllowed)
+			return
+		}
 
-	defer r.Body.Close()
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Failed to read request body", http.StatusBadRequest)
+			return
+		}
 
-	setRepos := make([]setRepo, 0)
+		defer r.Body.Close()
 
-	err = json.Unmarshal(body, &setRepos)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+		setRepos := make([]setRepo, 0)
 
-	repos, err := read_repos(false)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+		err = json.Unmarshal(body, &setRepos)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-	// probably not the fastest way to do this but the list should never be huge...
-	for _, setRepo := range setRepos {
-		if setRepo.Enabled {
-			for _, repo := range repos {
-				if *repo.Name == setRepo.Name {
-					repo.Enabled = &setRepo.Enabled
-				}
+		for _, setRepo := range setRepos {
+			repository := new(db_pkg.Repository)
+			repository.Enabled = &setRepo.Enabled
+			repository.Name = &setRepo.Name
+			err = db_pkg.SetRepository(ctx, repository)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 		}
-	}
 
-	err = write_repos(repos)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		w.Write([]byte("Repo data saved successfully"))
 	}
-
-	w.Write([]byte("Repo data saved successfully"))
 }
