@@ -23,6 +23,6 @@ func InitGithubConnection(ctx context.Context) (*github.Client, string, string, 
 
 	client := github.NewClient(tc)
 
-	return client, os.Getenv("user"), os.Getenv("repo"), nil
+	return client, os.Getenv("owner"), os.Getenv("repo"), nil
 
 }

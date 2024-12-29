@@ -1,18 +1,9 @@
 package github_pkg
 
-import (
-	"context"
-	"encoding/json"
-	"github-pull-request-dashboard/db_pkg"
-	"log"
-	"sync"
-
-	"github.com/google/go-github/v68/github"
-)
-
 /*
 get users and link them up to one of the active teams
 */
+/*
 func GetUsers(ctx context.Context, c *github.Client, owner string) ([]*CustomUser, error) {
 
 	listMembersOpt := &github.ListMembersOptions{
@@ -100,10 +91,11 @@ func GetUsers(ctx context.Context, c *github.Client, owner string) ([]*CustomUse
 
 	return customUsers, nil
 }
-
+*/
 /*
 process a member into the member channel
 */
+/*
 func processUser(userChannel chan<- *CustomUser, wg *sync.WaitGroup, ctx context.Context, c *github.Client, login string, teams map[string]*CustomTeam) {
 	defer wg.Done()
 
@@ -129,3 +121,4 @@ func writeUsers(users map[string]*CustomUser) error {
 
 	return nil
 }
+*/

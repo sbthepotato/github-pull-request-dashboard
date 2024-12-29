@@ -1,17 +1,19 @@
 <script>
-	import { createEventDispatcher } from "svelte";
-
 	export let checked;
 	export let id = "";
-	const dispatch = createEventDispatcher();
+	export let name = "";
 
-	function handle_change(event) {
+	function handleChange(event) {
 		checked = event.target.checked;
-		dispatch("change", { id, checked });
+		const changeEvent = new CustomEvent("change", {
+			detail: { id, checked },
+			bubbles: true,
+		});
+		dispatchEvent(changeEvent);
 	}
 </script>
 
 <label>
-	<input type="checkbox" bind:checked on:change={handle_change} />
+	<input type="checkbox" {id} {name} bind:checked on:change={handleChange} />
 	<slot></slot>
 </label>

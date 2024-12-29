@@ -1,6 +1,11 @@
 package web_pkg
 
-import "net/http"
+import (
+	"net/http"
+	"sync"
+)
+
+var mu sync.Mutex
 
 func setHeaders(w *http.ResponseWriter, content_type string) {
 

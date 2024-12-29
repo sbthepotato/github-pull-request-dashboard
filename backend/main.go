@@ -13,26 +13,28 @@ import (
 func main() {
 	ctx := context.Background()
 
-	err := db_pkg.InitDatabase(ctx)
+	db, err := db_pkg.InitDatabase(ctx)
 	if err != nil {
 		log.Fatalln("Could not start the database: ", err.Error())
 	}
 
-	client, owner, repo, err := github_pkg.InitGithubConnection(ctx)
+	defer db.Close()
+
+	client, owner, _, err := github_pkg.InitGithubConnection(ctx)
 	if err != nil {
 		log.Fatalln("Could not start up github connection: ", err.Error())
 	}
 
 	// GETS
 	http.HandleFunc("/config/hello_go", web_pkg.HelloGo)
-	http.HandleFunc("/config/get_repos", web_pkg.GetRepos(ctx, client, owner))
-	http.HandleFunc("/config/get_teams", web_pkg.GetTeams(ctx, client, owner))
-	http.HandleFunc("/config/get_members", web_pkg.GetMembers(ctx, client, owner))
-	http.HandleFunc("/dashboard/get_pr_list", web_pkg.GetPrList(ctx, client, owner, repo))
+	http.HandleFunc("/config/get_repos", web_pkg.GetRepositories(ctx, db, client, owner))
+	//http.HandleFunc("/config/get_teams", web_pkg.GetTeams(ctx, client, owner))
+	//http.HandleFunc("/config/get_members", web_pkg.GetMembers(ctx, client, owner))
+	//http.HandleFunc("/dashboard/get_pr_list", web_pkg.GetPrList(ctx, client, owner, repo))
 
 	// POSTS
-	http.HandleFunc("/config/set_teams", web_pkg.SetTeams)
-	http.HandleFunc("/config/set_repos", web_pkg.SetRepos)
+	http.HandleFunc("/config/set_repos", web_pkg.SetRepositories(ctx, db))
+	//http.HandleFunc("/config/set_teams", web_pkg.SetTeams)
 
 	cors_handler := web_pkg.EnableCors(http.DefaultServeMux)
 

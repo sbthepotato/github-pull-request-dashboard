@@ -1,18 +1,6 @@
 package web_pkg
 
-import (
-	"context"
-	"encoding/json"
-	"github-pull-request-dashboard/db_pkg"
-	"io"
-	"net/http"
-	"time"
-
-	"github-pull-request-dashboard/github_pkg"
-
-	"github.com/google/go-github/v68/github"
-)
-
+/*
 func GetTeams(ctx context.Context, c *github.Client, owner string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		setHeaders(&w, "json")
@@ -112,3 +100,4 @@ func SetTeams(w http.ResponseWriter, r *http.Request) {
 
 	w.Write([]byte("Team data saved successfully"))
 }
+*/

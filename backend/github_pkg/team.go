@@ -1,16 +1,9 @@
 package github_pkg
 
-import (
-	"context"
-	"encoding/json"
-	"github-pull-request-dashboard/db_pkg"
-
-	"github.com/google/go-github/v68/github"
-)
-
 /*
 get list of all teams for a given organisation
 */
+/*
 func GetTeams(ctx context.Context, c *github.Client, owner string) ([]*CustomTeam, error) {
 
 	opt := &github.ListOptions{
@@ -70,3 +63,4 @@ func readTeams() ([]*CustomTeam, error) {
 
 	return teams, nil
 }
+*/

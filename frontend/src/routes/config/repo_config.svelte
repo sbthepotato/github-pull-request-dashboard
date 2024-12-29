@@ -1,12 +1,17 @@
 <script>
 	import { onMount } from "svelte";
 	import Button from "../../components/button.svelte";
+	import Checkbox from "../../components/checkbox.svelte";
 
 	let repos = [];
-	let result = "";
+	let setResult = "";
 	let err = "";
 
-	async function get_repos(refresh) {
+	onMount(() => {
+		getRepos(false);
+	});
+
+	async function getRepos(refresh) {
 		try {
 			repos = [];
 			err = "";
@@ -28,30 +33,78 @@
 			err = error.message;
 		}
 	}
+
+	async function setRepos() {
+		const data = repos.map((repo) => ({
+			name: repo.name,
+			enabled: repo.enabled,
+		}));
+
+		try {
+			err = "";
+			setResult = "";
+
+			const response = await fetch("api/config/set_repos", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
+			});
+
+			setResult = await response.text();
+		} catch (error) {
+			err = error.message;
+		}
+	}
 </script>
 
 <h2>Repository Configuration</h2>
 <h3>Set the active repositories</h3>
 
-<Button color="green" on_click={() => get_repos(true)}>
-	hard refresh repository list
-</Button>
-
-{#if err !== ""}
-	<p>
-		{err}
-	</p>
-{:else if repos.length > 0}
-	<p>{repos.length} repos found</p>
-	<table>
-		<tbody>
-			{#each repos as repo}
+<div>
+	{#if err !== ""}
+		<p>
+			{err}
+		</p>
+	{:else if repos.length > 0}
+		<table>
+			<thead>
 				<tr>
-					<td>
-						{repo.name}
-					</td>
+					<th>Name</th>
+					<th>Enabled</th>
 				</tr>
-			{/each}
-		</tbody>
-	</table>
-{/if}
+			</thead>
+			<tbody>
+				{#each repos as repo}
+					<tr>
+						<td>
+							<a href={repo.html_url} target="_blank">
+								{repo.name}
+							</a>
+						</td>
+						<td>
+							<Checkbox
+								id={repo.name}
+								name={repo.name}
+								bind:checked={repo.enabled} />
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+
+		<p>{repos.length} repositories found</p>
+	{/if}
+
+	<Button color="green" on_click={() => getRepos(true)}>
+		refresh repository list from GitHub
+	</Button>
+	<Button color="green" on_click={() => setRepos()}>Save Repositories</Button>
+
+	{#if setResult !== ""}
+		<p>
+			{setResult}
+		</p>
+	{/if}
+</div>

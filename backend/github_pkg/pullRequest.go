@@ -1,20 +1,9 @@
 package github_pkg
 
-import (
-	"context"
-	"log"
-	"slices"
-	"sort"
-	"strconv"
-	"sync"
-	"time"
-
-	"github.com/google/go-github/v68/github"
-)
-
 /*
 get list of github pull requests and process them with review information
 */
+/*
 func GetPullRequests(ctx context.Context, c *github.Client, owner string, repo string, prevResult *PullRequestInfo) (*PullRequestInfo, error) {
 
 	if prevResult == nil {
@@ -124,9 +113,11 @@ func GetPullRequests(ctx context.Context, c *github.Client, owner string, repo s
 
 }
 
+*/
 /*
 Process a pull request into the pull request channel
 */
+/*
 func processPullRequest(PrChannel chan<- *CustomPullRequest, wg *sync.WaitGroup, ctx context.Context, c *github.Client, owner string, repo string, pr *github.PullRequest, users map[string]*CustomUser, teams map[string]*CustomTeam, idx int) {
 
 	defer wg.Done()
@@ -332,3 +323,4 @@ func processPullRequest(PrChannel chan<- *CustomPullRequest, wg *sync.WaitGroup,
 	PrChannel <- customPr
 
 }
+*/

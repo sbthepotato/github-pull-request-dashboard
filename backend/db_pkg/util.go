@@ -7,15 +7,13 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-var db *sql.DB
-
-func InitDatabase(ctx context.Context) error {
+func InitDatabase(ctx context.Context) (*sql.DB, error) {
 	db, err := sql.Open("sqlite", "github-pull-request-dashboard.db")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	initRepositoryTable(ctx, db)
 
-	return nil
+	return db, nil
 }

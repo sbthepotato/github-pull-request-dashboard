@@ -1,20 +1,12 @@
 package web_pkg
 
 import (
-	"context"
-	"encoding/json"
-	"github-pull-request-dashboard/github_pkg"
-	"log"
-	"net/http"
-	"time"
-
 	"github-pull-request-dashboard/db_pkg"
-
-	"github.com/google/go-github/v68/github"
 )
 
 var cachedPrListResults map[string]*db_pkg.PullRequestInfo
 
+/*
 func GetPrList(ctx context.Context, c *github.Client, owner string, defaultRepo string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -54,3 +46,5 @@ func GetPrList(ctx context.Context, c *github.Client, owner string, defaultRepo 
 		w.Write(jsonData)
 	}
 }
+
+*/

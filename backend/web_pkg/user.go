@@ -1,16 +1,6 @@
 package web_pkg
 
-import (
-	"context"
-	"encoding/json"
-	"github-pull-request-dashboard/db_pkg"
-	"github-pull-request-dashboard/github_pkg"
-	"net/http"
-	"time"
-
-	"github.com/google/go-github/v68/github"
-)
-
+/*
 func GetMembers(ctx context.Context, c *github.Client, owner string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		setHeaders(&w, "json")
@@ -52,3 +42,5 @@ func GetMembers(ctx context.Context, c *github.Client, owner string) http.Handle
 		w.Write(jsonData)
 	}
 }
+
+*/

@@ -2,6 +2,7 @@ package web_pkg
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"github-pull-request-dashboard/db_pkg"
 	"github-pull-request-dashboard/github_pkg"
@@ -11,18 +12,29 @@ import (
 	"github.com/google/go-github/v68/github"
 )
 
-func GetRepositories(ctx context.Context, c *github.Client, owner string) http.HandlerFunc {
+func GetRepositories(ctx context.Context, db *sql.DB, c *github.Client, owner string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		setHeaders(&w, "json")
 
 		mu.Lock()
 		defer mu.Unlock()
 
-		repos, err := github_pkg.GetRepositories(ctx, c, owner)
+		refresh := r.URL.Query().Get("refresh")
 
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		repos := make([]*db_pkg.Repository, 0)
+		var err error
+
+		if refresh == "y" {
+			repos, err = github_pkg.GetRepositories(ctx, db, c, owner)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			repos, err = db_pkg.GetRepositories(ctx, db, false)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
 		}
 
 		jsonData, err := json.Marshal(repos)
@@ -36,7 +48,7 @@ func GetRepositories(ctx context.Context, c *github.Client, owner string) http.H
 	}
 }
 
-func SetRepos(ctx context.Context) http.HandlerFunc {
+func SetRepositories(ctx context.Context, db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		setHeaders(&w, "text")
@@ -57,22 +69,17 @@ func SetRepos(ctx context.Context) http.HandlerFunc {
 
 		defer r.Body.Close()
 
-		setRepos := make([]setRepo, 0)
+		repositories := make([]*db_pkg.Repository, 0)
 
-		err = json.Unmarshal(body, &setRepos)
+		err = json.Unmarshal(body, &repositories)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		for _, setRepo := range setRepos {
-			repository := new(db_pkg.Repository)
-			repository.Enabled = &setRepo.Enabled
-			repository.Name = &setRepo.Name
-			err = db_pkg.SetRepository(ctx, repository)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
+		err = db_pkg.SetRepositories(ctx, db, repositories)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
 		w.Write([]byte("Repo data saved successfully"))

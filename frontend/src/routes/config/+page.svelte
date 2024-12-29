@@ -9,6 +9,10 @@
 <Button to="/">Back to home</Button>
 
 <div class="container">
+	<RepoConfig />
+</div>
+
+<div class="container">
 	<TeamConfig />
 </div>
 <div class="container">

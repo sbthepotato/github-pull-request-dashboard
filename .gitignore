@@ -1,5 +1,6 @@
 # private
 *.exe
+*.db
 
 # Logs
 logs
