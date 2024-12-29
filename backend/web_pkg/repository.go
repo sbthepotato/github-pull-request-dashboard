@@ -20,6 +20,7 @@ func GetRepositories(ctx context.Context, db *sql.DB, c *github.Client, owner st
 		defer mu.Unlock()
 
 		refresh := r.URL.Query().Get("refresh")
+		activeOnly := r.URL.Query().Get("active")
 
 		repos := make([]*db_pkg.Repository, 0)
 		var err error
@@ -31,7 +32,7 @@ func GetRepositories(ctx context.Context, db *sql.DB, c *github.Client, owner st
 				return
 			}
 		} else {
-			repos, err = db_pkg.GetRepositories(ctx, db, false)
+			repos, err = db_pkg.GetRepositories(ctx, db, activeOnly == "y")
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
@@ -80,6 +81,7 @@ func SetRepositories(ctx context.Context, db *sql.DB) http.HandlerFunc {
 		err = db_pkg.SetRepositories(ctx, db, repositories)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		w.Write([]byte("Repo data saved successfully"))

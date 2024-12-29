@@ -54,7 +54,7 @@ func initRepositoryStruct() *Repository {
 /**** public ****/
 
 /*
-create a repository in the db
+create a repository row
 */
 func CreateRepository(ctx context.Context, db *sql.DB, repository *Repository) error {
 	_, err := db.ExecContext(
@@ -83,7 +83,7 @@ func CreateRepository(ctx context.Context, db *sql.DB, repository *Repository) e
 }
 
 /*
-create many repositories in a single database transaction
+create many repository rows in single transaction
 */
 func CreateRepositories(ctx context.Context, db *sql.DB, repositories []*Repository) error {
 	tx, err := db.Begin()

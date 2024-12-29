@@ -19,7 +19,8 @@ Team with review info
 */
 type Team struct {
 	*github.Team
-	ReviewOrder *int `json:"review_order,omitempty"`
+	RepositoryName *string `json:"repository_name,omitempty"`
+	ReviewOrder    *int    `json:"review_order,omitempty"`
 }
 
 /*

@@ -13,7 +13,15 @@ func InitDatabase(ctx context.Context) (*sql.DB, error) {
 		return nil, err
 	}
 
-	initRepositoryTable(ctx, db)
+	err = initRepositoryTable(ctx, db)
+	if err != nil {
+		return nil, err
+	}
+
+	err = initTeamTable(ctx, db)
+	if err != nil {
+		return nil, err
+	}
 
 	return db, nil
 }

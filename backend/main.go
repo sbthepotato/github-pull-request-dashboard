@@ -20,7 +20,7 @@ func main() {
 
 	defer db.Close()
 
-	client, owner, _, err := github_pkg.InitGithubConnection(ctx)
+	client, owner, defaultRepository, err := github_pkg.InitGithubConnection(ctx)
 	if err != nil {
 		log.Fatalln("Could not start up github connection: ", err.Error())
 	}
@@ -28,13 +28,13 @@ func main() {
 	// GETS
 	http.HandleFunc("/config/hello_go", web_pkg.HelloGo)
 	http.HandleFunc("/config/get_repos", web_pkg.GetRepositories(ctx, db, client, owner))
-	//http.HandleFunc("/config/get_teams", web_pkg.GetTeams(ctx, client, owner))
+	http.HandleFunc("/config/get_teams", web_pkg.GetTeams(ctx, db, client, owner, defaultRepository))
 	//http.HandleFunc("/config/get_members", web_pkg.GetMembers(ctx, client, owner))
 	//http.HandleFunc("/dashboard/get_pr_list", web_pkg.GetPrList(ctx, client, owner, repo))
 
 	// POSTS
 	http.HandleFunc("/config/set_repos", web_pkg.SetRepositories(ctx, db))
-	//http.HandleFunc("/config/set_teams", web_pkg.SetTeams)
+	http.HandleFunc("/config/set_teams", web_pkg.SetTeams(ctx, db))
 
 	cors_handler := web_pkg.EnableCors(http.DefaultServeMux)
 

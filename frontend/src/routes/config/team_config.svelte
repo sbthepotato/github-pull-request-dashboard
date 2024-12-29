@@ -2,15 +2,16 @@
 	import { onMount } from "svelte";
 	import Button from "../../components/button.svelte";
 
+	export let repo = "";
 	let teams = [];
 	let result = "";
 	let err = "";
 
 	onMount(() => {
-		get_teams();
+		get_teams(false, repo);
 	});
 
-	async function get_teams(refresh) {
+	async function get_teams(refresh, repo) {
 		try {
 			teams = [];
 			err = "";
@@ -19,6 +20,10 @@
 
 			if (refresh) {
 				url = url + "?refresh=y";
+			}
+
+			if (repo !== undefined && repo !== "") {
+				url = url + "?repo=" + repo;
 			}
 
 			const response = await fetch(url);
@@ -35,8 +40,8 @@
 
 	async function set_teams() {
 		const data = teams.map((team) => ({
-			slug: team.slug,
-			review_enabled: team.review_enabled,
+			name: team.name,
+			repository_name: team.repository_name,
 			review_order: team.review_order,
 		}));
 
@@ -70,7 +75,6 @@
 		<thead>
 			<tr>
 				<th></th>
-				<th>Enable Team</th>
 				<th>Review Order</th>
 			</tr>
 		</thead>
@@ -82,18 +86,10 @@
 					</td>
 					<td>
 						<input
-							type="checkbox"
-							id={team.slug}
-							name={team.slug}
-							bind:checked={team.review_enabled} />
-					</td>
-					<td>
-						<input
 							type="number"
 							min="0"
 							max={teams.length}
-							bind:value={team.review_order}
-							disabled={!team.review_enabled} />
+							bind:value={team.review_order} />
 					</td>
 				</tr>
 			{/each}

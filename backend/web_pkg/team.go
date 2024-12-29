@@ -1,42 +1,44 @@
 package web_pkg
 
-/*
-func GetTeams(ctx context.Context, c *github.Client, owner string) http.HandlerFunc {
+import (
+	"context"
+	"database/sql"
+	"encoding/json"
+	"github-pull-request-dashboard/db_pkg"
+	"github-pull-request-dashboard/github_pkg"
+	"io"
+	"net/http"
+
+	"github.com/google/go-github/v68/github"
+)
+
+func GetTeams(ctx context.Context, db *sql.DB, c *github.Client, owner string, defaultRepo string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		setHeaders(&w, "json")
 
 		mu.Lock()
 		defer mu.Unlock()
 
-		var err error
-
 		refresh := r.URL.Query().Get("refresh")
-		currentTime := time.Now()
+		repositoryName := r.URL.Query().Get("repo")
+
+		if repositoryName == "" {
+			repositoryName = defaultRepo
+		}
 
 		if refresh == "y" {
-			cached_teams, err = github_pkg.GetTeams(ctx, c, owner)
-
+			_, err := github_pkg.GetTeams(ctx, db, c, owner)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
-			}
-
-			last_fetched_teams = time.Now()
-
-		} else if (currentTime.Sub(last_fetched_teams).Hours() < 1) || (len(cached_teams) == 0) {
-
-			teams, err := read_teams(false)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			for _, team := range teams {
-				cached_teams = append(cached_teams, team)
 			}
 		}
 
-		jsonData, err := json.Marshal(cached_teams)
+		// fetch teams again as somebody might refresh to get new teams
+		// but have existing team information that shouldn't be lost
+		teams, err := db_pkg.GetTeams(ctx, db, repositoryName)
+
+		jsonData, err := json.Marshal(teams)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -46,58 +48,36 @@ func GetTeams(ctx context.Context, c *github.Client, owner string) http.HandlerF
 	}
 }
 
-func SetTeams(w http.ResponseWriter, r *http.Request) {
-	setHeaders(&w, "text")
+func SetTeams(ctx context.Context, db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		setHeaders(&w, "text")
 
-	mu.Lock()
-	defer mu.Unlock()
+		mu.Lock()
+		defer mu.Unlock()
 
-	if r.Method != http.MethodPost {
-		http.Error(w, "invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
-
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Failed to read request body", http.StatusBadRequest)
-		return
-	}
-
-	defer r.Body.Close()
-
-	team_data := make([]SetTeam, 0)
-	cached_teams = make([]*db_pkg.Team, 0)
-
-	err = json.Unmarshal(body, &team_data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	team_map, err := read_teams(false)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	active_team_map := make(map[string]*db_pkg.Team)
-
-	for _, team := range team_data {
-		*team_map[team.Slug].ReviewEnabled = team.ReviewEnabled
-		*team_map[team.Slug].ReviewOrder = team.ReviewOrder
-
-		if team.ReviewEnabled {
-			active_team_map[team.Slug] = team_map[team.Slug]
+		if r.Method != http.MethodPost {
+			http.Error(w, "invalid request method", http.StatusMethodNotAllowed)
+			return
 		}
 
-		updated_team := team_map[team.Slug]
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Failed to read request body", http.StatusBadRequest)
+			return
+		}
 
-		cached_teams = append(cached_teams, updated_team)
+		defer r.Body.Close()
+
+		teams := make([]*db_pkg.Team, 0)
+
+		err = json.Unmarshal(body, &teams)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		err = db_pkg.UpsertTeamReviews(ctx, db, teams)
+
+		w.Write([]byte("Team review data saved successfully"))
 	}
-
-	write_teams(active_team_map, true)
-	write_teams(team_map, false)
-
-	w.Write([]byte("Team data saved successfully"))
 }
-*/

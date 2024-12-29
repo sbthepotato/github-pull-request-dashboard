@@ -4,6 +4,7 @@
 	import RepoConfig from "./repo_config.svelte";
 	import TeamConfig from "./team_config.svelte";
 	import MemberConfig from "./member_config.svelte";
+	import RepositorySelect from "../../components/repositorySelect.svelte";
 </script>
 
 <Button to="/">Back to home</Button>
@@ -15,6 +16,8 @@
 <div class="container">
 	<TeamConfig />
 </div>
+
+<RepositorySelect />
 <div class="container">
 	<MemberConfig />
 </div>
