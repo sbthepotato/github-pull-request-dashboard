@@ -1,10 +1,20 @@
 <script>
+	import { page } from "$app/stores";
+
 	import Button from "../../components/button.svelte";
 	import HelloGo from "./hello_go.svelte";
 	import RepoConfig from "./repo_config.svelte";
 	import TeamConfig from "./team_config.svelte";
 	import MemberConfig from "./member_config.svelte";
 	import RepositorySelect from "../../components/repositorySelect.svelte";
+
+	let repository = "";
+
+	function handleParams() {
+		repository = $page.url.searchParams.get("repo");
+	}
+
+	$: $page.url.search, handleParams();
 </script>
 
 <Button to="/">Back to home</Button>
@@ -14,7 +24,7 @@
 </div>
 
 <div class="container">
-	<TeamConfig />
+	<TeamConfig {repository} />
 </div>
 
 <div class="container">

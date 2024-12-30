@@ -2,7 +2,7 @@
 	import { onMount } from "svelte";
 	import Button from "../../components/button.svelte";
 
-	let repository = "";
+	export let repository = "";
 	let teams = [];
 	let result = "";
 	let err = "";
@@ -62,6 +62,8 @@
 			err = error.message;
 		}
 	}
+
+	$: repository, get_teams(false, repository);
 </script>
 
 <h2>Team Configuration</h2>
