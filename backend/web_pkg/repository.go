@@ -12,6 +12,13 @@ import (
 	"github.com/google/go-github/v68/github"
 )
 
+func GetDefaultRepository(ctx context.Context, repository string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		setHeaders(&w, "text")
+		w.Write([]byte(repository))
+	}
+}
+
 func GetRepositories(ctx context.Context, db *sql.DB, c *github.Client, owner string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		setHeaders(&w, "json")

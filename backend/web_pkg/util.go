@@ -3,6 +3,7 @@ package web_pkg
 import (
 	"net/http"
 	"sync"
+	"time"
 )
 
 var mu sync.Mutex
@@ -35,4 +36,12 @@ func EnableCors(handler http.Handler) http.Handler {
 		// Serve the actual request
 		handler.ServeHTTP(w, r)
 	})
+}
+
+/*
+Hello World from the backend
+*/
+func HelloGo(w http.ResponseWriter, r *http.Request) {
+	setHeaders(&w, "text")
+	w.Write([]byte("Hello, from the golang backend " + time.Now().String()))
 }

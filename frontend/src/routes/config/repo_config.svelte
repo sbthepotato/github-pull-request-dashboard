@@ -68,31 +68,15 @@
 			{err}
 		</p>
 	{:else if repos.length > 0}
-		<table>
-			<thead>
-				<tr>
-					<th>Name</th>
-					<th>Enabled</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each repos as repo}
-					<tr>
-						<td>
-							<a href={repo.html_url} target="_blank">
-								{repo.name}
-							</a>
-						</td>
-						<td>
-							<Checkbox
-								id={repo.name}
-								name={repo.name}
-								bind:checked={repo.enabled} />
-						</td>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
+		<ul>
+			{#each repos as repo}
+				<li>
+					<Checkbox id={repo.name} name={repo.name} bind:checked={repo.enabled}>
+						{repo.name}
+					</Checkbox>
+				</li>
+			{/each}
+		</ul>
 
 		<p>{repos.length} repositories found</p>
 	{/if}
@@ -108,3 +92,14 @@
 		</p>
 	{/if}
 </div>
+
+<style>
+	ul {
+		list-style: none;
+		columns: 3;
+	}
+
+	li {
+		padding: 12px;
+	}
+</style>

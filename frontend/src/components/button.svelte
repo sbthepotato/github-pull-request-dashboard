@@ -1,16 +1,17 @@
 <script>
 	import { goto } from "$app/navigation";
+	import { page } from "$app/stores";
 
 	export let type = "button";
 	export let on_click = () => {};
 	export let to = null;
 	export let color = "grey";
 
-	const url_prefix = import.meta.env.VITE_URL_PATH;
-
 	function click_handler(event) {
 		if (to) {
-			goto(url_prefix + to);
+			const params = $page.url.searchParams.toString();
+			const fullUrl = params ? `${to}?${params}` : to;
+			goto(fullUrl);
 		} else {
 			on_click(event);
 		}

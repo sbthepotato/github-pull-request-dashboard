@@ -2,16 +2,16 @@
 	import { onMount } from "svelte";
 	import Button from "../../components/button.svelte";
 
-	export let repo = "";
+	let repository = "";
 	let teams = [];
 	let result = "";
 	let err = "";
 
 	onMount(() => {
-		get_teams(false, repo);
+		get_teams(false, repository);
 	});
 
-	async function get_teams(refresh, repo) {
+	async function get_teams(refresh, repository) {
 		try {
 			teams = [];
 			err = "";
@@ -22,8 +22,8 @@
 				url = url + "?refresh=y";
 			}
 
-			if (repo !== undefined && repo !== "") {
-				url = url + "?repo=" + repo;
+			if (repository !== undefined && repository !== "") {
+				url = url + "?repo=" + repository;
 			}
 
 			const response = await fetch(url);

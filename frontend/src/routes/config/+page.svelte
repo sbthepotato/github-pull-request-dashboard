@@ -10,19 +10,22 @@
 <Button to="/">Back to home</Button>
 
 <div class="container">
-	<RepoConfig />
+	<RepositorySelect useDefault={true} />
 </div>
 
 <div class="container">
 	<TeamConfig />
 </div>
 
-<RepositorySelect />
 <div class="container">
 	<MemberConfig />
 </div>
 <div class="container">
 	<HelloGo />
+</div>
+
+<div class="container">
+	<RepoConfig />
 </div>
 
 <footer>

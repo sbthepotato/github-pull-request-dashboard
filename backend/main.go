@@ -28,6 +28,7 @@ func main() {
 	// GETS
 	http.HandleFunc("/config/hello_go", web_pkg.HelloGo)
 	http.HandleFunc("/config/get_repos", web_pkg.GetRepositories(ctx, db, client, owner))
+	http.HandleFunc("/config/get_default_repository", web_pkg.GetDefaultRepository(ctx, defaultRepository))
 	http.HandleFunc("/config/get_teams", web_pkg.GetTeams(ctx, db, client, owner, defaultRepository))
 	//http.HandleFunc("/config/get_members", web_pkg.GetMembers(ctx, client, owner))
 	//http.HandleFunc("/dashboard/get_pr_list", web_pkg.GetPrList(ctx, client, owner, repo))
