@@ -12,10 +12,10 @@
 	let teams = [];
 
 	onMount(() => {
-		get_members();
+		getUsers();
 	});
 
-	async function get_members(refresh) {
+	async function getUsers(refresh) {
 		try {
 			loading = true;
 			err = "";
@@ -23,7 +23,7 @@
 			team_members = { none: [] };
 			teams = [{ name: "none" }];
 
-			let url = "api/config/get_members";
+			let url = "api/config/sync_users";
 
 			if (refresh) {
 				url = url + "?refresh=y";
@@ -91,8 +91,11 @@
 	<p>No members found</p>
 {/if}
 
-<Button color="blue" on_click={() => get_members(true)}>
-	Sync member list with GitHub
+<Button color="blue" on_click={() => getUsers(true)}>
+	Sync all users with GitHub
+</Button>
+<Button color="blue" on_click={() => getUsers(true)}>
+	Sync repository team members with GitHub
 </Button>
 
 <style>

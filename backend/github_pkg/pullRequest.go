@@ -19,7 +19,7 @@ import (
 /*
 Process a pull request into the pull request channel
 */
-func processPullRequest(PrChannel chan<- *db_pkg.PullRequest,
+func processPullRequest(prChannel chan<- *db_pkg.PullRequest,
 	wg *sync.WaitGroup,
 	ctx context.Context,
 	c *github.Client,
@@ -56,7 +56,7 @@ func processPullRequest(PrChannel chan<- *db_pkg.PullRequest,
 	statusApproved := "APPROVED"
 	teamOther := "other"
 
-	if teams == nil {
+	if teams == nil || len(teams) == 0 {
 		teamOther = "review"
 	}
 
@@ -92,10 +92,6 @@ func processPullRequest(PrChannel chan<- *db_pkg.PullRequest,
 				review.User = user
 			}
 
-			// if team, ok := teams[*review.User.Login]; ok {
-			// 	review.Team = team
-			// }
-
 			review.State = &statusRequested
 
 			userReviewList = append(userReviewList, *review.User.Login)
@@ -127,7 +123,6 @@ func processPullRequest(PrChannel chan<- *db_pkg.PullRequest,
 
 	// loop in reverse because we're only interested in the most recent event
 	for i := len(reviews) - 1; i >= 0; i-- {
-		//for _, review := range reviews {
 		ghReview := reviews[i]
 		if (!slices.Contains(userReviewList, *ghReview.User.Login)) &&
 			(*detailedPr.User.Login != *ghReview.User.Login) &&
@@ -142,10 +137,6 @@ func processPullRequest(PrChannel chan<- *db_pkg.PullRequest,
 				user.User = ghReview.User
 				review.User = user
 			}
-
-			// if team, ok := teams[*review.User.Login]; ok {
-			// 	review.Team = team
-			// }
 
 			review.State = ghReview.State
 			userReviewList = append(userReviewList, *ghReview.User.Login)
@@ -229,7 +220,7 @@ func processPullRequest(PrChannel chan<- *db_pkg.PullRequest,
 		resultPr.ErrorText = &ErrorText
 	}
 
-	PrChannel <- resultPr
+	prChannel <- resultPr
 
 }
 
@@ -248,7 +239,13 @@ func GetPullRequests(ctx context.Context, db *sql.DB, c *github.Client, owner st
 		prevResult.Updated = &time.Time{}
 	}
 
-	log.Println("time ", *prevResult.Updated)
+	previousPrMap := make(map[int]*db_pkg.PullRequest)
+
+	if prevResult.PullRequests != nil {
+		for _, pullRequest := range prevResult.PullRequests {
+			previousPrMap[*pullRequest.Number] = pullRequest
+		}
+	}
 
 	opts := &github.PullRequestListOptions{
 		State:       "open",
@@ -284,15 +281,25 @@ func GetPullRequests(ctx context.Context, db *sql.DB, c *github.Client, owner st
 
 	var wg sync.WaitGroup
 	idx := 0
-	PrChannel := make(chan *db_pkg.PullRequest)
+	prChannel := make(chan *db_pkg.PullRequest)
+	var cachedPrList []*db_pkg.PullRequest
 
 	for _, pr := range ghPrs {
 		if *pr.Draft {
 			continue
 		}
 
-		wg.Add(1)
-		go processPullRequest(PrChannel, &wg, ctx, c, owner, RepositoryName, pr, users, teams, idx)
+		// if the pr was updated longer ago than the last fetch then we don't need to re-fetch it
+		if prevResult.Updated != nil && pr.UpdatedAt.GetTime().Before(*prevResult.Updated) {
+			savedPr := previousPrMap[*pr.Number]
+			tempIdx := idx
+			savedPr.Index = &tempIdx
+			cachedPrList = append(cachedPrList, savedPr)
+		} else {
+			wg.Add(1)
+			go processPullRequest(prChannel, &wg, ctx, c, owner, RepositoryName, pr, users, teams, idx)
+		}
+
 		idx++ // manual index as we are skipping draft
 	}
 
@@ -330,12 +337,16 @@ func GetPullRequests(ctx context.Context, db *sql.DB, c *github.Client, owner st
 
 	go func() {
 		wg.Wait()
-		close(PrChannel)
+		close(prChannel)
 	}()
 
 	prs := make([]*db_pkg.PullRequest, idx)
 
-	for processed_pr := range PrChannel {
+	for processed_pr := range prChannel {
+		prs[*processed_pr.Index] = processed_pr
+	}
+
+	for _, processed_pr := range cachedPrList {
 		prs[*processed_pr.Index] = processed_pr
 	}
 

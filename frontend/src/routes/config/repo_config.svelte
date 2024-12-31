@@ -82,7 +82,7 @@
 	{/if}
 
 	<Button color="blue" on_click={() => getRepos(true)}>
-		Sync repository list from GitHub
+		Sync repositories with GitHub
 	</Button>
 	<Button color="green" on_click={() => setRepos()}>Save Repositories</Button>
 

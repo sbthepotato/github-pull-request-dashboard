@@ -67,8 +67,11 @@
 				url = url + "?refresh=y";
 			}
 
-			console.log("repo ", repository);
-			if (repository !== null && repository !== "") {
+			if (
+				repository !== undefined &&
+				repository !== null &&
+				repository !== ""
+			) {
 				url = url + "?repo=" + repository;
 			}
 

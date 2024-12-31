@@ -137,6 +137,45 @@ func CreateUsers(ctx context.Context, db *sql.DB, users []*User) error {
 }
 
 /*
+upsert user team data into user_team table
+*/
+func UpsertUserTeams(ctx context.Context, db *sql.DB, userTeams map[string][]*github.User, repositoryName string) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	query, err := tx.PrepareContext(
+		ctx,
+		`insert into user_team(
+			user_login,
+			repository_name,
+			team_slug
+		) values (
+		?,
+		?,
+		?) on conflict (user_login, repository_name) do update set
+		team_slug = ?`)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	defer query.Close()
+
+	for teamSlug, users := range userTeams {
+		for _, user := range users {
+			_, err := query.ExecContext(ctx, user.Login, repositoryName, teamSlug, teamSlug)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+
+	return tx.Commit()
+}
+
+/*
 get users in map where team is key
 */
 func GetUsersAsTeamMap(ctx context.Context, db *sql.DB, repositoryName string) (map[string]*User, error) {

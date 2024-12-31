@@ -32,7 +32,7 @@ func main() {
 	http.HandleFunc("/config/get_repos", web_pkg.GetRepositories(ctx, db, client, owner))
 	http.HandleFunc("/config/get_default_repository", web_pkg.GetDefaultRepository(ctx, defaultRepository))
 	http.HandleFunc("/config/get_teams", web_pkg.GetTeams(ctx, db, client, owner, defaultRepository))
-	//http.HandleFunc("/config/get_members", web_pkg.GetMembers(ctx, client, owner))
+	http.HandleFunc("/config/sync_users", web_pkg.GetUsers(ctx, db, client, owner, defaultRepository))
 	http.HandleFunc("/dashboard/get_pr_list", web_pkg.GetPullRequests(ctx, db, client, owner, defaultRepository))
 
 	// POSTS
