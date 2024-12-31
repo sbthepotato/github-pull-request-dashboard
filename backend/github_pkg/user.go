@@ -92,6 +92,7 @@ func GetUsers(ctx context.Context, c *github.Client, owner string) ([]*CustomUse
 	return customUsers, nil
 }
 */
+
 /*
 process a member into the member channel
 */

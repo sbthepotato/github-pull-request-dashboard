@@ -20,7 +20,7 @@ func initUserTable(ctx context.Context, db *sql.DB) error {
 			login text primary key not null,
 			name text,
 			html_url text not null,
-			avatar_url text not null,
+			avatar_url text not null
 		)`,
 	)
 	if err != nil {
@@ -32,11 +32,11 @@ func initUserTable(ctx context.Context, db *sql.DB) error {
 		`create table if not exists user_team ( 
 			user_login text not null,
 			repository_name text not null,
-			team_name text not null,
-			primary key (user_login, repository_name, team_name),
+			team_slug text not null,
+			primary key (user_login, repository_name, team_slug),
 			foreign key (user_login) references user(login),
 			foreign key (repository_name) references repository(name),
-			foreign key (team_name) references team(name)
+			foreign key (team_slug) references team(slug)
 		)`,
 	)
 	if err != nil {
@@ -62,6 +62,7 @@ func initUserStruct() *User {
 	user.Team.ReviewOrder = new(int)
 
 	user.Team.Team = new(github.Team)
+	user.Team.Team.Slug = new(string)
 	user.Team.Team.Name = new(string)
 
 	return user
@@ -79,12 +80,12 @@ func getUserQuery(ctx context.Context, db *sql.DB, repositoryName string) (*sql.
 			user.name,
 			user.html_url,
 			user.avatar_url,
-			team_review.team_name,
+			team_review.team_slug,
 			team_review.review_order
 		from user
 		left join user_team on user.login = user_team.user_login 
 			and user_team.repository_name = ?
-		left join team_review on user_team.team_name = team_review.team_name
+		left join team_review on user_team.team_slug = team_review.team_slug
 			and team_review.repository_name = ?
 		order by name asc`,
 		repositoryName,
@@ -146,19 +147,39 @@ func GetUsersAsTeamMap(ctx context.Context, db *sql.DB, repositoryName string) (
 	}
 	defer result.Close()
 
-	users := make(map[string]*User, 0)
+	users := make(map[string]*User)
 
 	for result.Next() {
 
 		user := initUserStruct()
 
-		// TODO this isnt done
+		var (
+			userName    sql.NullString
+			teamSlug    sql.NullString
+			reviewOrder sql.NullInt64
+		)
+
 		err := result.Scan(
-			user.Name,
+			user.User.Login,
+			userName,
+			user.User.HTMLURL,
+			user.User.AvatarURL,
+			teamSlug,
+			reviewOrder,
 		)
 		if err != nil {
 			return nil, err
 		}
+
+		user.User.Name = nullStringToPtr(userName)
+		user.Team.Slug = nullStringToPtr(teamSlug)
+		if user.Team.Name == nil {
+			otherTeam := "other"
+			user.Team.Name = &otherTeam
+		}
+		user.Team.ReviewOrder = nullIntToPtr(reviewOrder)
+
+		users[*user.Team.Name] = user
 
 	}
 
@@ -181,23 +202,33 @@ func GetUsersAsLoginMap(ctx context.Context, db *sql.DB, repositoryName string) 
 	}
 	defer result.Close()
 
-	users := make(map[string]*User, 0)
+	users := make(map[string]*User)
 
 	for result.Next() {
 
 		user := initUserStruct()
 
+		var (
+			userName    sql.NullString
+			teamSlug    sql.NullString
+			reviewOrder sql.NullInt64
+		)
+
 		err := result.Scan(
 			user.User.Login,
-			user.User.Name,
+			userName,
 			user.User.HTMLURL,
 			user.User.AvatarURL,
-			user.Team.Name,
-			user.Team.ReviewOrder,
+			teamSlug,
+			reviewOrder,
 		)
 		if err != nil {
 			return nil, err
 		}
+
+		user.User.Name = nullStringToPtr(userName)
+		user.Team.Slug = nullStringToPtr(teamSlug)
+		user.Team.ReviewOrder = nullIntToPtr(reviewOrder)
 
 		users[*user.Login] = user
 

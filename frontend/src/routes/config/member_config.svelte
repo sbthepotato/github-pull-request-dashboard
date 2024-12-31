@@ -91,8 +91,8 @@
 	<p>No members found</p>
 {/if}
 
-<Button color="green" on_click={() => get_members(true)}>
-	Hard refresh member list
+<Button color="blue" on_click={() => get_members(true)}>
+	Sync member list with GitHub
 </Button>
 
 <style>

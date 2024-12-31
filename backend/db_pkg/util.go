@@ -30,3 +30,24 @@ func InitDatabase(ctx context.Context) (*sql.DB, error) {
 
 	return db, nil
 }
+
+/*
+turn sql null int to regular int pointer
+*/
+func nullIntToPtr(value sql.NullInt64) *int {
+	if value.Valid {
+		result := int(value.Int64)
+		return &result
+	}
+	return nil
+}
+
+/*
+turn sql null string to regular string pointer
+*/
+func nullStringToPtr(value sql.NullString) *string {
+	if value.Valid {
+		return &value.String
+	}
+	return nil
+}

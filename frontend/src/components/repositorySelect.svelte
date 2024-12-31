@@ -65,8 +65,13 @@
 	$: repos, getDefaultRepo();
 </script>
 
-<select bind:value={selected} on:change={handleChange} on:input={handleChange}>
-	{#each repos as repo}
-		<option value={repo.name}>{repo.name}</option>
-	{/each}
-</select>
+{#if repos !== undefined && repos.length > 0}
+	<select
+		bind:value={selected}
+		on:change={handleChange}
+		on:input={handleChange}>
+		{#each repos as repo}
+			<option value={repo.name}>{repo.name}</option>
+		{/each}
+	</select>
+{/if}

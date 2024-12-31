@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"github-pull-request-dashboard/db_pkg"
 	"github-pull-request-dashboard/github_pkg"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/google/go-github/v68/github"
 )
@@ -27,16 +29,26 @@ func GetPullRequests(ctx context.Context, db *sql.DB, c *github.Client, owner st
 			repo = defaultRepo
 		}
 
-		if refresh == "y" {
-			PullRequestResult := new(db_pkg.PullRequestInfo)
+		currentTime := time.Now()
 
-			PullRequestResult, err := github_pkg.GetPullRequests(ctx, db, c, owner, repo, cachedPrListResults[repo])
+		if cachedPrListResults == nil ||
+			cachedPrListResults[repo] == nil ||
+			(refresh == "y" && currentTime.Sub(*cachedPrListResults[repo].Updated) > 1) ||
+			currentTime.Sub(*cachedPrListResults[repo].Updated).Minutes() > 2 {
+
+			log.Println("get new")
+			if cachedPrListResults == nil {
+				cachedPrListResults = make(map[string]*db_pkg.PullRequestInfo)
+			}
+
+			pullRequestResult, err := github_pkg.GetPullRequests(ctx, db, c, owner, repo, cachedPrListResults[repo])
+
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			cachedPrListResults[repo] = PullRequestResult
+			cachedPrListResults[repo] = pullRequestResult
 		}
 
 		jsonData, err := json.Marshal(cachedPrListResults[repo])

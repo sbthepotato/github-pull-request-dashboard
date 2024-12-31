@@ -17,7 +17,8 @@ func initTeamTable(ctx context.Context, db *sql.DB) error {
 	_, err := db.ExecContext(
 		ctx,
 		`create table if not exists team ( 
-			name text primary key not null,
+			slug text primary key not null,
+			name text not null,
 			html_url text not null
 		)`,
 	)
@@ -28,11 +29,11 @@ func initTeamTable(ctx context.Context, db *sql.DB) error {
 	_, err = db.ExecContext(
 		ctx,
 		`create table if not exists team_review ( 
-			team_name text not null,
+			team_slug text not null,
 			repository_name text not null,
-			review_order integer default 0,
-			primary key (team_name, repository_name),
-			foreign key (team_name) references team(name),
+			review_order integer not null,
+			primary key (team_slug, repository_name),
+			foreign key (team_slug) references team(slug),
 			foreign key (repository_name) references repository(name)
 		)`,
 	)
@@ -53,8 +54,9 @@ func initTeamStruct() *Team {
 	team.ReviewOrder = new(int)
 
 	team.Team = new(github.Team)
-	team.Name = new(string)
-	team.HTMLURL = new(string)
+	team.Team.Slug = new(string)
+	team.Team.Name = new(string)
+	team.Team.HTMLURL = new(string)
 
 	return team
 }
@@ -140,13 +142,14 @@ func GetTeams(ctx context.Context, db *sql.DB, repositoryName string) ([]*Team, 
 
 	result, err := db.QueryContext(
 		ctx,
-		`select 
+		`select
+			team.slug,
 			team.name,
 			team.html_url,
 			coalesce(team_review.repository_name, ?),
 			coalesce(team_review.review_order, 0)
 		from team
-		left join team_review on team.name = team_review.team_name 
+		left join team_review on team.slug = team_review.team_slug 
 			and team_review.repository_name = ?
 		order by name asc`,
 		repositoryName,
@@ -164,6 +167,7 @@ func GetTeams(ctx context.Context, db *sql.DB, repositoryName string) ([]*Team, 
 		team := initTeamStruct()
 
 		err := result.Scan(
+			team.Slug,
 			team.Name,
 			team.HTMLURL,
 			team.RepositoryName,
@@ -182,4 +186,52 @@ func GetTeams(ctx context.Context, db *sql.DB, repositoryName string) ([]*Team, 
 
 	return teams, nil
 
+}
+
+/*
+get teams as map where team slug is key
+*/
+func GetTeamsAsMap(ctx context.Context, db *sql.DB, repositoryName string) (map[string]*Team, error) {
+
+	result, err := db.QueryContext(
+		ctx,
+		`select
+			team.slug,
+			team.name,
+			team.html_url,
+			team_review.repository_name,
+			team_review.review_order
+		from team
+		inner join team_review on team.slug = team_review.team_slug 
+			and team_review.repository_name = ?
+		order by name asc`,
+		repositoryName,
+		repositoryName)
+
+	if err != nil {
+		return nil, err
+	}
+	defer result.Close()
+
+	teams := make(map[string]*Team)
+
+	for result.Next() {
+
+		team := initTeamStruct()
+
+		err := result.Scan(
+			team.Name,
+			team.Slug,
+			team.HTMLURL,
+			team.RepositoryName,
+			team.ReviewOrder,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		teams[*team.Slug] = team
+	}
+
+	return teams, nil
 }

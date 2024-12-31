@@ -34,7 +34,7 @@
 	{/if}
 </p>
 
-<Button color="green" on_click={hello_go}>Say hello to the backend</Button>
+<Button color="blue" on_click={hello_go}>Say hello to the backend</Button>
 
 <style>
 	span.good {

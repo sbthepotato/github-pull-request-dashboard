@@ -81,8 +81,8 @@
 		<p>{repos.length} repositories found</p>
 	{/if}
 
-	<Button color="green" on_click={() => getRepos(true)}>
-		refresh repository list from GitHub
+	<Button color="blue" on_click={() => getRepos(true)}>
+		Sync repository list from GitHub
 	</Button>
 	<Button color="green" on_click={() => setRepos()}>Save Repositories</Button>
 

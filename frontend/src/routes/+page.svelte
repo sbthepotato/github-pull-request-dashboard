@@ -11,13 +11,14 @@
 	import Checkbox from "../components/checkbox.svelte";
 	import Searchbar from "../components/searchbar.svelte";
 	import Loading from "../components/loading.svelte";
+	import RepositorySelect from "../components/repositorySelect.svelte";
 	import PRTable from "./pr_table.svelte";
 	import PRAgg from "./pr_aggregation.svelte";
 
-	let url = "api/dashboard/get_pr_list";
 	let err = "";
 	let result = {};
 	let pr_list = {};
+	let repository = "";
 
 	let loading = false;
 
@@ -32,7 +33,9 @@
 	let search_query = "";
 
 	onMount(() => {
-		get_pr_list();
+		repository = $page.url.searchParams.get("repo");
+
+		get_pr_list(false, repository);
 
 		created_by_filter = $page.url.searchParams.get("created_by");
 
@@ -51,15 +54,22 @@
 		clearInterval(reload_interval);
 	});
 
-	async function get_pr_list(refresh) {
+	async function get_pr_list(refresh, repository) {
 		try {
 			loading = true;
 			err = "";
 			result = {};
 			pr_list = {};
 
+			let url = "api/dashboard/get_pr_list";
+
 			if (refresh) {
 				url = url + "?refresh=y";
+			}
+
+			console.log("repo ", repository);
+			if (repository !== null && repository !== "") {
+				url = url + "?repo=" + repository;
 			}
 
 			const response = await fetch(url);
@@ -115,6 +125,17 @@
 			$page.url.searchParams.get("show_search"),
 			false,
 		);
+
+		const newRepository = $page.url.searchParams.get("repo") ?? "";
+
+		if (
+			newRepository !== "" &&
+			repository !== "" &&
+			newRepository !== repository
+		) {
+			repository = newRepository;
+			get_pr_list(false, repository);
+		}
 	}
 
 	function get_filter() {
@@ -238,9 +259,10 @@
 
 <section class="buttons">
 	<Button color="grey" to="/config">Config</Button>
-	<Button color="green" on_click={() => get_pr_list(true)}>
-		Hard Refresh PR List
+	<Button color="blue" on_click={() => get_pr_list(true)}>
+		Refresh PR List
 	</Button>
+	<RepositorySelect />
 	<Checkbox
 		id="auto_reload"
 		checked={checkboxes.auto_reload}

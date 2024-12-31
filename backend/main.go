@@ -13,6 +13,7 @@ import (
 func main() {
 	ctx := context.Background()
 
+	// start the database and create tables if they dont exist
 	db, err := db_pkg.InitDatabase(ctx)
 	if err != nil {
 		log.Fatalln("Could not start the database: ", err.Error())
@@ -20,6 +21,7 @@ func main() {
 
 	defer db.Close()
 
+	// connect to github using the env
 	client, owner, defaultRepository, err := github_pkg.InitGithubConnection(ctx)
 	if err != nil {
 		log.Fatalln("Could not start up github connection: ", err.Error())

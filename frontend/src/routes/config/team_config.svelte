@@ -107,8 +107,8 @@
 	<p>No teams found</p>
 {/if}
 
-<Button color="green" on_click={() => get_teams(true)}>
-	hard refresh team list
+<Button color="blue" on_click={() => get_teams(true)}>
+	Sync teams with GitHub
 </Button>
 <Button color="green" on_click={() => set_teams()}>Save Teams</Button>
 
