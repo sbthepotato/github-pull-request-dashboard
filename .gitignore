@@ -1,6 +1,7 @@
 # private
 *.exe
 *.db
+*.sqlite3
 
 # Logs
 logs

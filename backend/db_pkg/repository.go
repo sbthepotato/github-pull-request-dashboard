@@ -54,35 +54,6 @@ func initRepositoryStruct() *Repository {
 /**** public ****/
 
 /*
-create a repository row
-*/
-func CreateRepository(ctx context.Context, db *sql.DB, repository *Repository) error {
-	_, err := db.ExecContext(
-		ctx,
-		`insert or ignore into repository (
-			name, 
-			default_branch, 
-			html_url, 
-			enabled 
-			) values (
-			?,
-			?,
-			?,
-			?)`,
-		repository.Name,
-		repository.DefaultBranch,
-		repository.HTMLURL,
-		repository.Enabled,
-	)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-/*
 create many repository rows in single transaction
 */
 func CreateRepositories(ctx context.Context, db *sql.DB, repositories []*Repository) error {
@@ -119,25 +90,6 @@ func CreateRepositories(ctx context.Context, db *sql.DB, repositories []*Reposit
 	}
 
 	return tx.Commit()
-}
-
-/*
-set a repository
-*/
-func SetRepository(ctx context.Context, db *sql.DB, repository *Repository) error {
-	_, err := db.ExecContext(
-		ctx,
-		`update repository set 
-			enabled = ?
-			where name = ?`,
-		repository.Enabled,
-		repository.Name,
-	)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 /*

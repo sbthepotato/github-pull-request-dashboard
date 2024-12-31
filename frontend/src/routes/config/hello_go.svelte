@@ -22,7 +22,7 @@
 	}
 </script>
 
-<h2>Connection test</h2>
+<h2>Connection Test</h2>
 
 <p>
 	{#if err}

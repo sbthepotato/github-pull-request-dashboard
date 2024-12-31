@@ -1,13 +1,26 @@
 package github_pkg
 
+import (
+	"context"
+	"database/sql"
+	"github-pull-request-dashboard/db_pkg"
+	"log"
+	"slices"
+	"sort"
+	"strconv"
+	"sync"
+	"time"
+
+	"github.com/google/go-github/v68/github"
+)
+
 /*
 get list of github pull requests and process them with review information
 */
-/*
-func GetPullRequests(ctx context.Context, c *github.Client, owner string, repo string, prevResult *PullRequestInfo) (*PullRequestInfo, error) {
+func GetPullRequests(ctx context.Context, db *sql.DB, c *github.Client, owner string, RepositoryName string, prevResult *db_pkg.PullRequestInfo) (*db_pkg.PullRequestInfo, error) {
 
 	if prevResult == nil {
-		prevResult = new(PullRequestInfo)
+		prevResult = new(db_pkg.PullRequestInfo)
 	}
 
 	if prevResult.Updated == nil {
@@ -24,7 +37,7 @@ func GetPullRequests(ctx context.Context, c *github.Client, owner string, repo s
 	var ghPrs []*github.PullRequest
 
 	for {
-		respPrs, resp, err := c.PullRequests.List(ctx, owner, repo, opts)
+		respPrs, resp, err := c.PullRequests.List(ctx, owner, RepositoryName, opts)
 		if err != nil {
 			return nil, err
 		}
@@ -38,7 +51,7 @@ func GetPullRequests(ctx context.Context, c *github.Client, owner string, repo s
 		opts.Page = resp.NextPage
 	}
 
-	users, err := readUsers()
+	users, err := db_pkg.GetUsersAsLoginMap(ctx, db, RepositoryName)
 	if err != nil {
 		return nil, err
 	}
@@ -113,16 +126,13 @@ func GetPullRequests(ctx context.Context, c *github.Client, owner string, repo s
 
 }
 
-*/
 /*
 Process a pull request into the pull request channel
 */
-/*
-func processPullRequest(PrChannel chan<- *CustomPullRequest, wg *sync.WaitGroup, ctx context.Context, c *github.Client, owner string, repo string, pr *github.PullRequest, users map[string]*CustomUser, teams map[string]*CustomTeam, idx int) {
+func processPullRequest(PrChannel chan<- *db_pkg.PullRequest, wg *sync.WaitGroup, ctx context.Context, c *github.Client, owner string, repo string, pr *github.PullRequest, users map[string]*db_pkg.User, teams map[string]*db_pkg.Team, idx int) {
 
 	defer wg.Done()
 
-	customPr := new(CustomPullRequest)
 	var ErrorMessage string
 	var ErrorText string
 
@@ -137,10 +147,10 @@ func processPullRequest(PrChannel chan<- *CustomPullRequest, wg *sync.WaitGroup,
 		*detailedPr.State = "draft"
 	}
 
-	customPr.PullRequest = detailedPr
+	resultPr := new(db_pkg.PullRequest)
+	resultPr.PullRequest = detailedPr
 
-	review := new(Review)
-	reviewOverview := make([]Review, 0)
+	reviewOverview := make([]db_pkg.Review, 0)
 	userReviewList := make([]string, 0)
 	statusRequested := "REVIEW_REQUESTED"
 	changesRequested := "Changes Requested"
@@ -151,50 +161,50 @@ func processPullRequest(PrChannel chan<- *CustomPullRequest, wg *sync.WaitGroup,
 		teamOther = "review"
 	}
 
-	// first populate requested teams and users. any previous state doesn't matter if you're requested
+	// first populate requested teams
 	if detailedPr.RequestedTeams != nil {
 		for _, requestedTeam := range detailedPr.RequestedTeams {
-			review.State = &statusRequested
+			review := new(db_pkg.Review)
 
-			// if the team map isn't available, just use what we have
-			if val, ok := teams[*requestedTeam.Slug]; ok {
-				review.Team = val
+			if team, ok := teams[*requestedTeam.Name]; ok {
+				review.Team = team
 			} else {
-				custom_team := new(CustomTeam)
-				custom_team.Team = requestedTeam
-				review.Team = custom_team
+				team := new(db_pkg.Team)
+				team.Team = requestedTeam
+				review.Team = team
 			}
 
 			review.State = &statusRequested
-
 			reviewOverview = append(reviewOverview, *review)
 		}
 	}
 
+	// then requested users, add them to the list as previous state doesn't matter if you're requested
 	if detailedPr.RequestedReviewers != nil {
 		for _, requestedUser := range detailedPr.RequestedReviewers {
+			review := new(db_pkg.Review)
 
-			// if the user map isn't available, just use what we have
-			if val, ok := users[*requestedUser.Login]; ok {
-				review.User = val
+			if user, ok := users[*requestedUser.Login]; ok {
+				review.User = user.User
+				review.Team = user.Team
 			} else {
-				customUser := new(CustomUser)
-				customUser.User = requestedUser
-				review.User = customUser
+				user := new(db_pkg.User)
+				user.User = requestedUser
+				review.User = user
 			}
 
-			if review.User.Team != nil {
-				review.Team = teams[*review.User.Team.Slug]
-			}
+			// if team, ok := teams[*review.User.Login]; ok {
+			// 	review.Team = team
+			// }
+
 			review.State = &statusRequested
 
+			userReviewList = append(userReviewList, *review.User.Login)
 			reviewOverview = append(reviewOverview, *review)
-			userReviewList = append(userReviewList, *requestedUser.Login)
 		}
 	}
 
-	var reviews []*github.PullRequestReview
-
+	reviews := make([]*github.PullRequestReview, 0)
 	opt := &github.ListOptions{PerPage: 100}
 
 	for {
@@ -203,7 +213,7 @@ func processPullRequest(PrChannel chan<- *CustomPullRequest, wg *sync.WaitGroup,
 			ErrorText = ErrorText + err.Error()
 			ErrorMessage = ErrorMessage + "error fetching pull request reviews for pr " + strconv.Itoa(*pr.Number)
 			teamOther = "error"
-			customPr.Awaiting = &teamOther
+			resultPr.Awaiting = &teamOther
 
 			log.Println(ErrorMessage, err.Error())
 		}
@@ -214,7 +224,6 @@ func processPullRequest(PrChannel chan<- *CustomPullRequest, wg *sync.WaitGroup,
 			break
 		}
 		opt.Page = resp.NextPage
-
 	}
 
 	// loop in reverse because we're only interested in the most recent event
@@ -225,102 +234,102 @@ func processPullRequest(PrChannel chan<- *CustomPullRequest, wg *sync.WaitGroup,
 			(*detailedPr.User.Login != *ghReview.User.Login) &&
 			(*ghReview.State != "COMMENTED") {
 
-			review := new(Review)
-			userReviewList = append(userReviewList, *ghReview.User.Login)
-			if val, ok := users[*ghReview.User.Login]; ok {
-				review.User = val
+			review := new(db_pkg.Review)
+			if user, ok := users[*ghReview.User.Login]; ok {
+				review.User = user.User
+				review.Team = user.Team
 			} else {
-				customUser := new(CustomUser)
-				customUser.User = ghReview.User
-				review.User = customUser
+				user := new(db_pkg.User)
+				user.User = ghReview.User
+				review.User = user
 			}
 
-			if review.User != nil && review.User.Team != nil {
-				review.Team = teams[*review.User.Team.Slug]
-			}
+			// if team, ok := teams[*review.User.Login]; ok {
+			// 	review.Team = team
+			// }
+
 			review.State = ghReview.State
+			userReviewList = append(userReviewList, *ghReview.User.Login)
 			reviewOverview = append(reviewOverview, *review)
-
 		}
 	}
 
-	customPr.CreatedBy = users[*detailedPr.User.Login]
-	customPr.ReviewOverview = make([]*Review, 0)
-	customPr.Index = &idx
+	resultPr.CreatedBy = users[*detailedPr.User.Login]
+	resultPr.ReviewOverview = make([]*db_pkg.Review, 0)
+	resultPr.Index = &idx
 	currentPriority := 100
 	unassigned := false
 	approvedCount := 0
 
-	for _, customReview := range reviewOverview {
-		if *customReview.State != "DISMISSED" {
+	for _, review := range reviewOverview {
+		if *review.State != "DISMISSED" {
 
-			review := new(Review)
-			review.User = customReview.User
-			review.Team = customReview.Team
-			review.State = customReview.State
+			finalReview := new(db_pkg.Review)
+			finalReview.User = review.User
+			finalReview.Team = review.Team
+			finalReview.State = review.State
 
-			if *review.State == statusRequested {
-				if review.Team != nil {
+			if *finalReview.State == statusRequested {
+				if finalReview.Team != nil {
 
-					if review.Team.ReviewOrder != nil &&
-						*review.Team.ReviewOrder < currentPriority &&
-						(customPr.Awaiting != nil &&
-							*customPr.Awaiting != "error" ||
-							customPr.Awaiting == nil) {
+					if finalReview.Team != nil &&
+						*finalReview.Team.ReviewOrder < currentPriority &&
+						(resultPr.Awaiting != nil &&
+							*resultPr.Awaiting != "error" ||
+							resultPr.Awaiting == nil) {
 
-						currentPriority = *review.Team.ReviewOrder
-						customPr.Awaiting = review.Team.Name
+						currentPriority = *finalReview.Team.ReviewOrder
+						resultPr.Awaiting = finalReview.Team.Name
 
-						if review.User == nil {
+						if finalReview.User == nil {
 							unassigned = true
-							customPr.Unassigned = &unassigned
+							resultPr.Unassigned = &unassigned
 						} else {
 							unassigned = false
-							customPr.Unassigned = &unassigned
+							resultPr.Unassigned = &unassigned
 						}
 
-					} else if review.Team.ReviewOrder != nil &&
-						*review.Team.ReviewOrder == currentPriority &&
-						review.User != nil {
+					} else if finalReview.Team != nil &&
+						*finalReview.Team.ReviewOrder == currentPriority &&
+						finalReview.User != nil {
 
 						unassigned = false
-						customPr.Unassigned = &unassigned
+						resultPr.Unassigned = &unassigned
 
-					} else if customPr.Awaiting == nil {
-						customPr.Awaiting = &teamOther
+					} else if resultPr.Awaiting == nil {
+						resultPr.Awaiting = &teamOther
 					}
 
-				} else if review.Team == nil {
-					customPr.Awaiting = &teamOther
+				} else if finalReview.Team == nil {
+					resultPr.Awaiting = &teamOther
 				}
 
 			} else if *review.State == "CHANGES_REQUESTED" {
-				customPr.Awaiting = &changesRequested
+				resultPr.Awaiting = &changesRequested
 				currentPriority = -1
 				unassigned = false
-				customPr.Unassigned = &unassigned
+				resultPr.Unassigned = &unassigned
 
 			} else if *review.State == statusApproved {
 				approvedCount++
 			}
-			customPr.ReviewOverview = append(customPr.ReviewOverview, review)
+			resultPr.ReviewOverview = append(resultPr.ReviewOverview, finalReview)
 
 		}
 
-		if customPr.Awaiting == nil && approvedCount >= 1 {
-			customPr.Awaiting = &statusApproved
+		if resultPr.Awaiting == nil && approvedCount >= 1 {
+			resultPr.Awaiting = &statusApproved
 			unassigned = false
-			customPr.Unassigned = &unassigned
+			resultPr.Unassigned = &unassigned
 		}
 	}
 
 	if ErrorMessage != "" {
 		ErrorMessage = ErrorMessage + ". See the console on the server or the errorText field in the network tab for more information"
-		customPr.ErrorMessage = &ErrorMessage
-		customPr.ErrorText = &ErrorText
+		resultPr.ErrorMessage = &ErrorMessage
+		resultPr.ErrorText = &ErrorText
 	}
 
-	PrChannel <- customPr
+	PrChannel <- resultPr
 
 }
-*/

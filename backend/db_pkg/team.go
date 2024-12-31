@@ -48,61 +48,18 @@ create empty team struct with db fields
 */
 func initTeamStruct() *Team {
 	team := new(Team)
+
+	team.RepositoryName = new(string)
+	team.ReviewOrder = new(int)
+
 	team.Team = new(github.Team)
 	team.Name = new(string)
 	team.HTMLURL = new(string)
-	team.RepositoryName = new(string)
-	team.ReviewOrder = new(int)
 
 	return team
 }
 
 /**** public ****/
-
-/*
-create a team row
-*/
-func CreateTeam(ctx context.Context, db *sql.DB, team *Team) error {
-
-	_, err := db.ExecContext(
-		ctx,
-		`insert or ignore into team (
-			name, 
-			html_url
-			) values (
-			?,
-			?
-			)`,
-		team.Name,
-		team.HTMLURL,
-	)
-	if err != nil {
-		return err
-	}
-
-	if team.RepositoryName != nil && *team.ReviewOrder != 0 {
-		_, err := db.ExecContext(
-			ctx,
-			`insert or ignore into team_review (
-				team_name,
-				repository_name,
-				review_order 
-				) values (
-				?,
-				?,
-				?
-				)`,
-			team.Name,
-			team.RepositoryName,
-			team.ReviewOrder,
-		)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
 
 /*
 create many team rows in single transaction

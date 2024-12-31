@@ -8,7 +8,7 @@ import (
 )
 
 func InitDatabase(ctx context.Context) (*sql.DB, error) {
-	db, err := sql.Open("sqlite", "github-pull-request-dashboard.db")
+	db, err := sql.Open("sqlite", "github-pull-request-dashboard.sqlite3")
 	if err != nil {
 		return nil, err
 	}
@@ -19,6 +19,11 @@ func InitDatabase(ctx context.Context) (*sql.DB, error) {
 	}
 
 	err = initTeamTable(ctx, db)
+	if err != nil {
+		return nil, err
+	}
+
+	err = initUserTable(ctx, db)
 	if err != nil {
 		return nil, err
 	}

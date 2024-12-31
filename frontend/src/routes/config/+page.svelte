@@ -30,18 +30,19 @@
 <div class="container">
 	<MemberConfig />
 </div>
-<div class="container">
-	<HelloGo />
-</div>
 
 <div class="container">
 	<RepoConfig />
 </div>
 
+<div class="container">
+	<HelloGo />
+</div>
+
 <footer>
 	made by sbthepotato | <a
 		href="https://github.com/sbthepotato/gh-pull-request-dashboard"
-		target="_blank">GitHub Repo</a>
+		target="_blank">GitHub Repository</a>
 </footer>
 
 <style>

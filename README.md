@@ -1,4 +1,4 @@
-# gh-pull-request-dashboard
+# github-pull-request-dashboard
 This is a dashboard to see the open Pull Requests for a given repository 
 
 ## configuration
@@ -12,11 +12,9 @@ all backend files live in ``backend/``.
 The most important file here is in ``./backend/db/`` named ``example_config.json``. Copy this file and rename it to be just ``config.json`` Then fill in the fields with the following information:
 
 ```
-{
-  "token": "", -- Your GitHub Personal Access Token
-  "owner": "google", -- Owner of the repository
-  "repo": "go-github" -- Name of the repository
-}
+token=<Your GitHub Personal Access Token>
+owner=<Owner of the repository>
+repo=<Name of the repository>
 ```
 
 in ``backend/`` run ``go get .`` and ``go run .`` to run the backend
