@@ -4,7 +4,7 @@
 	let answer = "";
 	let err = "";
 
-	async function hello_go() {
+	async function helloGo() {
 		try {
 			answer = "";
 			err = "";
@@ -35,7 +35,7 @@
 		{/if}
 	</p>
 
-	<Button color="blue" on_click={hello_go}>Say hello to the backend</Button>
+	<Button color="blue" on_click={helloGo}>Say hello to the backend</Button>
 </div>
 
 <style>

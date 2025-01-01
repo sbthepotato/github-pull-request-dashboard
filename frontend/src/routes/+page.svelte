@@ -1,12 +1,7 @@
 <script>
 	import { onDestroy, onMount } from "svelte";
 	import { page } from "$app/stores";
-	import {
-		set_many_url_params,
-		set_url_param,
-		string_to_bool,
-		boolToString,
-	} from "$lib/index.js";
+	import { setUrlParam, stringToBool, boolToString } from "$lib/index.js";
 
 	import Button from "../components/button.svelte";
 	import Checkbox from "../components/checkbox.svelte";
@@ -34,7 +29,7 @@
 	onMount(() => {
 		repository = $page.url.searchParams.get("repo");
 
-		get_pr_list(false, repository);
+		getPullRequests(false, repository);
 
 		// temporary warning because of the rename
 		if ($page.url.searchParams.get("created_by")) {
@@ -45,12 +40,12 @@
 
 		user_filter = $page.url.searchParams.get("user");
 
-		auto_reload = string_to_bool(
+		auto_reload = stringToBool(
 			$page.url.searchParams.get("auto_reload"),
 			false,
 		);
 
-		show_search = string_to_bool(
+		show_search = stringToBool(
 			$page.url.searchParams.get("show_search"),
 			false,
 		);
@@ -60,7 +55,7 @@
 		clearInterval(reload_interval);
 	});
 
-	async function get_pr_list(refresh, repository) {
+	async function getPullRequests(refresh, repository) {
 		try {
 			loading = true;
 			err = "";
@@ -88,14 +83,14 @@
 		}
 	}
 
-	function handle_searchbar_change(event) {
+	function handleSearchbarChange(event) {
 		search_query = event.detail.value.toLowerCase();
-		get_filter();
+		getFilter();
 	}
 
-	function handle_params() {
+	function handleParams() {
 		user_filter = $page.url.searchParams.get("user");
-		show_search = string_to_bool(
+		show_search = stringToBool(
 			$page.url.searchParams.get("show_search"),
 			false,
 		);
@@ -108,11 +103,11 @@
 			newRepository !== repository
 		) {
 			repository = newRepository;
-			get_pr_list(false, repository);
+			getPullRequests(false, repository);
 		}
 	}
 
-	function get_filter() {
+	function getFilter() {
 		if (
 			(user_filter !== null || search_query !== "") &&
 			result.pull_requests !== undefined
@@ -170,25 +165,25 @@
 		}
 	}
 
-	function clear_filters() {
-		set_many_url_params({ user: null });
+	function clearFilters() {
+		setUrlParam("user", null);
 		user_filter = null;
 		search_query = "";
-		get_filter();
+		getFilter();
 	}
 
-	$: $page.url.search, handle_params();
-	$: result, get_current_user(), get_filter();
-	$: user_filter, get_current_user(), get_filter();
+	$: $page.url.search, handleParams();
+	$: result, get_current_user(), getFilter();
+	$: user_filter, get_current_user(), getFilter();
 	$: if (show_search) {
-		set_url_param("show_search", "y");
+		setUrlParam("show_search", "y");
 	} else {
-		set_url_param("show_search");
+		setUrlParam("show_search");
 	}
 	$: if (auto_reload) {
-		set_url_param("auto_reload", "y");
+		setUrlParam("auto_reload", "y");
 	} else {
-		set_url_param("auto_reload");
+		setUrlParam("auto_reload");
 	}
 </script>
 
@@ -203,8 +198,8 @@
 			<Searchbar
 				value={search_query}
 				placeholder="Search Pull Requests..."
-				on:change={handle_searchbar_change}
-				on:input={handle_searchbar_change} />
+				on:change={handleSearchbarChange}
+				on:input={handleSearchbarChange} />
 		{/if}
 		{#if user_filter === null}
 			<PRTable {pr_list} />
@@ -243,14 +238,14 @@
 
 <section class="buttons">
 	<Button color="grey" to="/config">Config</Button>
-	<Button color="blue" on_click={() => get_pr_list(true)}>
+	<Button color="blue" on_click={() => getPullRequests(true)}>
 		Refresh PR List
 	</Button>
 	<RepositorySelect />
 	<Checkbox id="auto_reload" bind:checked={auto_reload}>Auto Refresh</Checkbox>
 	<Checkbox id="show_search" bind:checked={show_search}>Show Search</Checkbox>
 	{#if user_filter !== null || search_query !== ""}
-		<Button color="blue" on_click={() => clear_filters()}>Clear Filters</Button>
+		<Button color="blue" on_click={() => clearFilters()}>Clear Filters</Button>
 	{/if}
 </section>
 

@@ -2,10 +2,12 @@
 	import { onMount } from "svelte";
 	import Button from "../../components/button.svelte";
 	import Checkbox from "../../components/checkbox.svelte";
+	import Loading from "../../components/loading.svelte";
 
 	let repos = [];
 	let setResult = "";
 	let err = "";
+	let loading = false;
 
 	onMount(() => {
 		getRepos(false);
@@ -13,6 +15,7 @@
 
 	async function getRepos(refresh) {
 		try {
+			loading = true;
 			repos = [];
 			err = "";
 
@@ -31,6 +34,8 @@
 			}
 		} catch (error) {
 			err = error.message;
+		} finally {
+			loading = false;
 		}
 	}
 
@@ -68,6 +73,8 @@
 			<p>
 				{err}
 			</p>
+		{:else if loading}
+			<Loading size="64px">Loading repositories...</Loading>
 		{:else if repos.length > 0}
 			<ul>
 				{#each repos as repo}

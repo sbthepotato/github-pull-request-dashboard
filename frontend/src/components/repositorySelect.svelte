@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from "svelte";
 	import { page } from "$app/stores";
-	import { set_url_param } from "$lib/index.js";
+	import { setUrlParam } from "$lib/index.js";
 
 	export let useDefault = false;
 	export let text = "";
@@ -60,7 +60,7 @@
 	}
 
 	function handleChange() {
-		set_url_param("repo", selected);
+		setUrlParam("repo", selected);
 	}
 
 	$: repos, getDefaultRepo();

@@ -1,5 +1,5 @@
 <script>
-	import { get_text_luminance, get_pretty_date } from "$lib/index.js";
+	import { getTextLuminance, getPrettyDate } from "$lib/index.js";
 
 	import Review from "../components/review.svelte";
 	import PrAwaiting from "../components/pr_awaiting.svelte";
@@ -37,7 +37,7 @@
 											&nbsp;
 											<span
 												class="tag"
-												style="background-color:#{label.color}; color: {get_text_luminance(
+												style="background-color:#{label.color}; color: {getTextLuminance(
 													label.color,
 												)}">
 												{label.name}
@@ -53,10 +53,10 @@
 										</a>
 									</span>
 									<span>
-										Created {get_pretty_date(pr.created_at)}
+										Created {getPrettyDate(pr.created_at)}
 									</span>
 									<span>
-										Modified {get_pretty_date(pr.updated_at)}
+										Modified {getPrettyDate(pr.updated_at)}
 									</span>
 									<span>
 										<Icon name="file-code-16" {size} color="grey" />
