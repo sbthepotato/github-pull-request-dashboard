@@ -1,47 +1,51 @@
 <script>
 	import { onDestroy, onMount } from "svelte";
 	import { page } from "$app/stores";
-	import {
-		set_many_url_params,
-		set_url_param,
-		string_to_bool,
-	} from "$lib/index.js";
+	import { setUrlParam, stringToBool, boolToString } from "$lib/index.js";
 
 	import Button from "../components/button.svelte";
 	import Checkbox from "../components/checkbox.svelte";
 	import Searchbar from "../components/searchbar.svelte";
 	import Loading from "../components/loading.svelte";
+	import RepositorySelect from "../components/repositorySelect.svelte";
 	import PRTable from "./pr_table.svelte";
 	import PRAgg from "./pr_aggregation.svelte";
 
-	let url = "api/dashboard/get_pr_list";
 	let err = "";
 	let result = {};
 	let pr_list = {};
+	let repository = "";
 
 	let loading = false;
 
-	let checkboxes = {
-		auto_reload: false,
-		show_search: false,
-	};
+	let show_search = false;
+	let auto_reload = false;
 	let reload_interval;
 
-	let created_by_filter = "";
-	let created_by_filter_user = {};
+	let user_filter = "";
+	let user_filter_object = {};
 	let search_query = "";
 
 	onMount(() => {
-		get_pr_list();
+		repository = $page.url.searchParams.get("repo");
 
-		created_by_filter = $page.url.searchParams.get("created_by");
+		getPullRequests(false, repository);
 
-		checkboxes.auto_reload = string_to_bool(
+		// temporary warning because of the rename
+		if ($page.url.searchParams.get("created_by")) {
+			window.alert(
+				"the created by filter has been renamed to user, please delete your current bookmark and make a new one.",
+			);
+		}
+
+		user_filter = $page.url.searchParams.get("user");
+
+		auto_reload = stringToBool(
 			$page.url.searchParams.get("auto_reload"),
 			false,
 		);
 
-		checkboxes.show_search = string_to_bool(
+		show_search = stringToBool(
 			$page.url.searchParams.get("show_search"),
 			false,
 		);
@@ -51,18 +55,19 @@
 		clearInterval(reload_interval);
 	});
 
-	async function get_pr_list(refresh) {
+	async function getPullRequests(refresh, repository) {
 		try {
 			loading = true;
 			err = "";
 			result = {};
 			pr_list = {};
 
-			if (refresh) {
-				url = url + "?refresh=y";
-			}
-
-			const response = await fetch(url);
+			const response = await fetch(
+				"api/dashboard/get_pr_list?refresh=" +
+					boolToString(refresh) +
+					"&repo=" +
+					repository,
+			);
 
 			if (response.ok) {
 				result = await response.json();
@@ -78,68 +83,53 @@
 		}
 	}
 
-	function handle_checkbox_change(event) {
-		const { id, checked } = event.detail;
-		checkboxes = { ...checkboxes, [id]: checked };
-
-		switch (id) {
-			case "show_search":
-				if (checked) {
-					set_url_param("show_search", "y");
-					get_filter();
-				} else {
-					set_url_param("show_search");
-					get_filter();
-				}
-				break;
-			case "auto_reload":
-				if (checked) {
-					set_url_param("auto_reload", "y");
-					reload_interval = setInterval(get_pr_list, 600000);
-				} else {
-					set_url_param("auto_reload");
-					clearInterval(reload_interval);
-				}
-				break;
-		}
-	}
-
-	function handle_searchbar_change(event) {
+	function handleSearchbarChange(event) {
 		search_query = event.detail.value.toLowerCase();
-		get_filter();
+		getFilter();
 	}
 
-	function handle_params() {
-		created_by_filter = $page.url.searchParams.get("created_by");
-		checkboxes.show_search = string_to_bool(
+	function handleParams() {
+		user_filter = $page.url.searchParams.get("user");
+		show_search = stringToBool(
 			$page.url.searchParams.get("show_search"),
 			false,
 		);
+
+		const newRepository = $page.url.searchParams.get("repo") ?? "";
+
+		if (
+			newRepository !== "" &&
+			repository !== "" &&
+			newRepository !== repository
+		) {
+			repository = newRepository;
+			getPullRequests(false, repository);
+		}
 	}
 
-	function get_filter() {
+	function getFilter() {
 		if (
-			(created_by_filter !== null || search_query !== "") &&
+			(user_filter !== null || search_query !== "") &&
 			result.pull_requests !== undefined
 		) {
 			pr_list = result.pull_requests.filter(
 				(pr) =>
-					(created_by_filter === null ||
-						pr.created_by.login === created_by_filter ||
+					(user_filter === null ||
+						pr.created_by.login === user_filter ||
 						pr.review_overview?.some(
 							(review) =>
-								review.user?.login === created_by_filter &&
+								review.user?.login === user_filter &&
 								review.state === "REVIEW_REQUESTED" &&
 								pr.awaiting !== "Changes Requested",
 						) ||
 						(pr.unassigned === true &&
-							pr.created_by.login != created_by_filter &&
-							pr.awaiting === created_by_filter_user.team?.name &&
+							pr.created_by.login != user_filter &&
+							pr.awaiting === user_filter_object.team?.name &&
 							pr.awaiting !== "Changes Requested")) &&
 					(pr.title.toLowerCase().includes(search_query) ||
 						pr.awaiting?.toLowerCase().includes(search_query) ||
 						pr.created_by.login.toLowerCase().includes(search_query) ||
-						pr.created_by.name.toLowerCase().includes(search_query) ||
+						pr.created_by.name?.toLowerCase().includes(search_query) ||
 						pr.base.label.toLowerCase().includes(search_query) ||
 						pr.number.toString().includes(search_query) ||
 						pr.review_overview?.some(
@@ -153,7 +143,7 @@
 						)),
 			);
 
-			if (created_by_filter !== null) {
+			if (user_filter !== null) {
 			}
 		} else {
 			pr_list = result.pull_requests;
@@ -161,13 +151,13 @@
 	}
 
 	function get_current_user() {
-		if (created_by_filter == null) {
-			created_by_filter_user = {};
+		if (user_filter == null) {
+			user_filter_object = {};
 		} else {
 			if (result.users !== undefined) {
 				result.users.forEach((user) => {
-					if (user?.login === created_by_filter) {
-						created_by_filter_user = user;
+					if (user?.login === user_filter) {
+						user_filter_object = user;
 						return true;
 					}
 				});
@@ -175,61 +165,71 @@
 		}
 	}
 
-	function clear_filters() {
-		set_many_url_params({ created_by: null });
-		created_by_filter = null;
+	function clearFilters() {
+		setUrlParam("user", null);
+		user_filter = null;
 		search_query = "";
-		get_filter();
+		getFilter();
 	}
 
-	$: $page.url.search, handle_params();
-	$: result, get_current_user(), get_filter();
-	$: created_by_filter, get_current_user(), get_filter();
+	$: $page.url.search, handleParams();
+	$: result, get_current_user(), getFilter();
+	$: user_filter, get_current_user(), getFilter();
+	$: if (show_search) {
+		setUrlParam("show_search", "y");
+	} else {
+		setUrlParam("show_search");
+	}
+	$: if (auto_reload) {
+		setUrlParam("auto_reload", "y");
+	} else {
+		setUrlParam("auto_reload");
+	}
 </script>
 
 <section class="pr-table">
 	{#if err !== ""}
 		{err}
 	{:else if loading}
-		<Loading text="Loading PR list..." />
+		<Loading>Loading PR list...</Loading>
 	{:else}
 		<PRAgg {pr_list} review_teams={result.review_teams} />
-		{#if checkboxes.show_search}
+		{#if show_search}
 			<Searchbar
 				value={search_query}
 				placeholder="Search Pull Requests..."
-				on:change={handle_searchbar_change}
-				on:input={handle_searchbar_change} />
+				on:change={handleSearchbarChange}
+				on:input={handleSearchbarChange} />
 		{/if}
-		{#if created_by_filter === null}
+		{#if user_filter === null}
 			<PRTable {pr_list} />
-		{:else if created_by_filter !== null}
+		{:else if user_filter !== null}
 			<PRTable
-				title="Created by {created_by_filter}"
+				title="Created by {user_filter}"
 				pr_list={pr_list?.filter(
-					(pr) => pr.created_by.login === created_by_filter,
+					(pr) => pr.created_by.login === user_filter,
 				)} />
 
 			<PRTable
-				title="{created_by_filter} requested reviewer"
+				title="{user_filter} requested reviewer"
 				pr_list={pr_list?.filter((pr) =>
 					pr.review_overview?.some(
 						(review) =>
-							review.user?.login === created_by_filter &&
+							review.user?.login === user_filter &&
 							review.state === "REVIEW_REQUESTED",
 					),
 				)} />
 
-			{#if created_by_filter_user.team}
+			{#if user_filter_object.team}
 				<PRTable
 					show_empty={false}
-					title="Waiting on {created_by_filter_user.team
+					title="Waiting on {user_filter_object.team
 						.name} - Not assigned to anyone else"
 					pr_list={pr_list?.filter(
 						(pr) =>
 							pr.unassigned === true &&
-							pr.created_by.login != created_by_filter &&
-							pr.awaiting === created_by_filter_user.team.name,
+							pr.created_by.login != user_filter &&
+							pr.awaiting === user_filter_object.team.name,
 					)} />
 			{/if}
 		{/if}
@@ -238,19 +238,14 @@
 
 <section class="buttons">
 	<Button color="grey" to="/config">Config</Button>
-	<Button color="green" on_click={() => get_pr_list(true)}>
-		Hard Refresh PR List
+	<Button color="blue" on_click={() => getPullRequests(true)}>
+		Refresh PR List
 	</Button>
-	<Checkbox
-		id="auto_reload"
-		checked={checkboxes.auto_reload}
-		on:change={handle_checkbox_change}>Auto Refresh</Checkbox>
-	<Checkbox
-		id="show_search"
-		checked={checkboxes.show_search}
-		on:change={handle_checkbox_change}>Show Search</Checkbox>
-	{#if created_by_filter !== null || search_query !== ""}
-		<Button color="blue" on_click={() => clear_filters()}>Clear Filters</Button>
+	<RepositorySelect />
+	<Checkbox id="auto_reload" bind:checked={auto_reload}>Auto Refresh</Checkbox>
+	<Checkbox id="show_search" bind:checked={show_search}>Show Search</Checkbox>
+	{#if user_filter !== null || search_query !== ""}
+		<Button color="blue" on_click={() => clearFilters()}>Clear Filters</Button>
 	{/if}
 </section>
 

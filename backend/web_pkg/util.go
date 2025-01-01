@@ -1,15 +1,12 @@
-package main
+package web_pkg
 
 import (
-	"context"
-	"encoding/json"
-	"log"
 	"net/http"
-	"os"
-
-	"github.com/google/go-github/v67/github"
-	"golang.org/x/oauth2"
+	"sync"
+	"time"
 )
+
+var mu sync.Mutex
 
 func setHeaders(w *http.ResponseWriter, content_type string) {
 
@@ -23,7 +20,7 @@ func setHeaders(w *http.ResponseWriter, content_type string) {
 	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")
 }
 
-func enable_cors(handler http.Handler) http.Handler {
+func EnableCors(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -41,35 +38,10 @@ func enable_cors(handler http.Handler) http.Handler {
 	})
 }
 
-func load_config() *Config {
-	content, err := os.ReadFile("./db/config.json")
-	if err != nil {
-		log.Fatal("Error when opening config: ", err)
-	}
-
-	var payload Config
-	err = json.Unmarshal(content, &payload)
-	if err != nil {
-		log.Fatal("Error during Unmarshal of config: ", err)
-	}
-
-	return &payload
-}
-
-func init_github_connection(ctx context.Context) (*Config, *github.Client) {
-	config := load_config()
-
-	authToken := config.Token
-
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: authToken},
-	)
-	tc := oauth2.NewClient(ctx, ts)
-
-	client := github.NewClient(tc)
-
-	config.Token = ""
-
-	return config, client
-
+/*
+Hello World from the backend
+*/
+func HelloGo(w http.ResponseWriter, r *http.Request) {
+	setHeaders(&w, "text")
+	w.Write([]byte("Hello, from the golang backend " + time.Now().String()))
 }

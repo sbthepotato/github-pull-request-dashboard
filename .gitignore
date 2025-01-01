@@ -1,8 +1,7 @@
 # private
-config.json
-backend/db/*
 *.exe
-
+*.db
+*.sqlite3
 
 # Logs
 logs

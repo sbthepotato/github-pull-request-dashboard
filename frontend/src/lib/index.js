@@ -15,7 +15,7 @@ const date_options = {
 	hour12: false,
 };
 
-export function set_url_param(param_name, param_value) {
+export function setUrlParam(param_name, param_value) {
 	if (typeof window !== "undefined") {
 		const url = new URL(window.location.href);
 		if (
@@ -32,7 +32,7 @@ export function set_url_param(param_name, param_value) {
 	}
 }
 
-export function set_many_url_params(params) {
+export function setManyUrlParams(params) {
 	if (typeof window !== "undefined") {
 		const url = new URL(window.location.href);
 
@@ -52,7 +52,7 @@ export function set_many_url_params(params) {
 	}
 }
 
-export function get_text_luminance(hexColor) {
+export function getTextLuminance(hexColor) {
 	// Remove the "#" if it exists
 	const color = hexColor.replace("#", "");
 
@@ -68,7 +68,7 @@ export function get_text_luminance(hexColor) {
 	return luminance > 0.5 ? "#0d1117" : "#f0f6fc";
 }
 
-export function string_to_bool(string, otherwise = false) {
+export function stringToBool(string, otherwise = false) {
 	if (string === "y") {
 		return true;
 	} else if (string === "n") {
@@ -78,7 +78,14 @@ export function string_to_bool(string, otherwise = false) {
 	}
 }
 
-export function get_pretty_date(date_str) {
+export function boolToString(bool) {
+	if (bool) {
+		return "y";
+	}
+	return "n";
+}
+
+export function getPrettyDate(date_str) {
 	const date = new Date(date_str);
 	return date.toLocaleString("en-us", date_options);
 }

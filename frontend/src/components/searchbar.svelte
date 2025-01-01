@@ -1,6 +1,5 @@
 <script>
 	import { createEventDispatcher } from "svelte";
-	import Icon from "./icon.svelte";
 
 	export let placeholder = "Search...";
 	export let value = "";

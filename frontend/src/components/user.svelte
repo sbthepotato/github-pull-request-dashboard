@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from "svelte";
-	import { set_url_param } from "$lib/index.js";
+	import { setUrlParam } from "$lib/index.js";
 
 	export let user;
 	export let size = "l";
@@ -22,7 +22,7 @@
 		if (type === "a") {
 			return;
 		} else {
-			set_url_param("created_by", user.login);
+			setUrlParam("user", user.login);
 		}
 	}
 </script>

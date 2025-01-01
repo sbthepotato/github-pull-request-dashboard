@@ -4,23 +4,42 @@ import (
 	"context"
 	"log"
 	"net/http"
+
+	"github-pull-request-dashboard/db_pkg"
+	"github-pull-request-dashboard/github_pkg"
+	"github-pull-request-dashboard/web_pkg"
 )
 
 func main() {
 	ctx := context.Background()
 
-	config, client := init_github_connection(ctx)
+	// start the database and create tables if they dont exist
+	db, err := db_pkg.InitDatabase(ctx)
+	if err != nil {
+		log.Fatalln("Could not start the database: ", err.Error())
+	}
+
+	defer db.Close()
+
+	// connect to github using the env
+	client, owner, defaultRepository, err := github_pkg.InitGithubConnection(ctx)
+	if err != nil {
+		log.Fatalln("Could not start up github connection: ", err.Error())
+	}
 
 	// GETS
-	http.HandleFunc("/config/hello_go", hello_go)
-	http.HandleFunc("/config/get_teams", get_teams(ctx, client, config.Owner))
-	http.HandleFunc("/config/get_members", get_members(ctx, client, config.Owner))
-	http.HandleFunc("/dashboard/get_pr_list", get_pr_list(ctx, client, config.Owner, config.Repo))
+	http.HandleFunc("/config/hello_go", web_pkg.HelloGo)
+	http.HandleFunc("/config/get_repos", web_pkg.GetRepositories(ctx, db, client, owner))
+	http.HandleFunc("/config/get_default_repository", web_pkg.GetDefaultRepository(ctx, defaultRepository))
+	http.HandleFunc("/config/get_teams", web_pkg.GetTeams(ctx, db, client, owner, defaultRepository))
+	http.HandleFunc("/config/get_users", web_pkg.GetUsers(ctx, db, client, owner, defaultRepository))
+	http.HandleFunc("/dashboard/get_pr_list", web_pkg.GetPullRequests(ctx, db, client, owner, defaultRepository))
 
 	// POSTS
-	http.HandleFunc("/config/set_teams", set_teams)
+	http.HandleFunc("/config/set_repos", web_pkg.SetRepositories(ctx, db))
+	http.HandleFunc("/config/set_teams", web_pkg.SetTeams(ctx, db))
 
-	cors_handler := enable_cors(http.DefaultServeMux)
+	cors_handler := web_pkg.EnableCors(http.DefaultServeMux)
 
 	// Start the server on port 8080
 	log.Println("Starting server on :8080...")

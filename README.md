@@ -1,49 +1,22 @@
-# gh-pull-request-dashboard
-This is a dashboard to see the open Pull Requests for a given repository 
+# github-pull-request-dashboard
+This is a dashboard to see the open Pull Requests for a given repository, depending on how teams are configured they can display which team a pull request is currently waiting on and the dashboard can be filtered on a user so that they can periodically open it to see what is waiting for them.
 
-## configuration
-Information on how to set everything up. In their current form these steps expect you 
-
-first you should run ``npm i`` in the root of the project
-
-### backend
-all backend files live in ``backend/``.
-
-The most important file here is in ``./backend/db/`` named ``example_config.json``. Copy this file and rename it to be just ``config.json`` Then fill in the fields with the following information:
-
-```
-{
-  "token": "", -- Your GitHub Personal Access Token
-  "owner": "google", -- Owner of the repository
-  "repo": "go-github" -- Name of the repository
-}
+## Install
+in the terminal
+1. run ``npm i`` in the root of the project
+2. ``cd`` to the ``backend/`` directory and run ``go build .``
+3. in the ``backend/`` directory you have to create a ``.env`` file with the following information:
+```env
+token=<Your GitHub Personal Access Token>
+owner=<Owner of the repository>
+repo=<Name of the repository>
 ```
 
-in ``backend/`` run ``go get .`` and ``go run .`` to run the backend
-
-### frontend
-navigate to ``frontend/`` and run ``npm i``
-
-If you want to change the port the web-server runs on you can change the ``port`` values in ``vite.config.js``
-
-you can run or build the frontend from the root by running ``npm run dev`` or ``npm run build``.
-
-A ``.env`` file can be created with the following fields:
-
-| name | what it does |
-| --- | --- |
-| ``VITE_URL_PATH=`` | if you are running under a domain path (example.com/pr-dashboard) this can be filled in to the path (/pr-dashboard) |
-
-
-## running the application
-
-From the root directory you can either run ``npm run start`` which will run a development version of the application.
-
-
-to run the built versions of the application it is required to build the backend with ``cd backend/`` & ``go build .`` and the frontend to have been built with ``npm run build``.
-
-on Linux you can run with ``npm run lin`` to run a built version of the application. 
-
-on Windows you can run ``npm run win`` to run a built version of the application, 
-
+4. ``cd ..`` back to project root, ``cd`` to ``frontend/``, run ``npm run build``
+5. (optional) if you are hosting in a domain path (example.com/dashboard for example) then you have to create a ``.env`` file under frontend with the following field:
+```env
+VITE_URL_PATH=<if you are hosting on 'example.com/dashboard' then this should be '/dashboard'>
+```
+6. (optional), if you want to run the frontend on a different port than the default '5173' port then you can change the ``port`` value in ``vite.config.js`` 
+7. run by going to the project root end executing ``npm run win`` or ``npm run lin`` depending on if you're on windows or Linux/Mac respectively
 

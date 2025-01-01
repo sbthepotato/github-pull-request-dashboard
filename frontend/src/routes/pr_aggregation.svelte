@@ -16,7 +16,7 @@
 					pr_stats[team.name] = 0;
 				});
 			} else {
-				pr_stats[review] = 0;
+				pr_stats["review"] = 0;
 			}
 
 			pr_list.forEach((pull) => {

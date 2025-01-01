@@ -3,47 +3,34 @@
 	import User from "../../components/user.svelte";
 	import Button from "../../components/button.svelte";
 	import Loading from "../../components/loading.svelte";
+	import { boolToString } from "$lib/index.js";
 
+	export let repository = "";
 	let err = "";
-	let result = [];
+	let result = {};
 	let loading = false;
 
-	let team_members = {};
-	let teams = [];
-
 	onMount(() => {
-		get_members();
+		getUsers(false, "members");
 	});
 
-	async function get_members(refresh) {
+	async function getUsers(refresh, type) {
 		try {
 			loading = true;
 			err = "";
-			result = [];
-			team_members = { none: [] };
-			teams = [{ name: "none" }];
+			result = {};
 
-			let url = "api/config/get_members";
-
-			if (refresh) {
-				url = url + "?refresh=y";
-			}
-
-			const response = await fetch(url);
+			const response = await fetch(
+				"api/config/get_users?refresh=" +
+					boolToString(refresh) +
+					"&type=" +
+					type +
+					"&repo=" +
+					repository,
+			);
 
 			if (response.ok) {
 				result = await response.json();
-
-				result.forEach((user) => {
-					if (user.team === undefined) {
-						team_members["none"].push(user);
-					} else if (user.team.name in team_members) {
-						team_members[user.team.name].push(user);
-					} else {
-						team_members[user.team.name] = [user];
-						teams.push(user.team);
-					}
-				});
 			} else {
 				throw new Error(await response.text());
 			}
@@ -55,47 +42,58 @@
 	}
 </script>
 
-<h2>Member Configuration</h2>
+<div class="container">
+	<h2>Member Configuration</h2>
 
-{#if err !== ""}
-	<p>
-		{err}
-	</p>
-{:else if loading}
-	<Loading text="Loading Members..." size="64px" />
-{:else if result.length > 0}
-	<table>
-		<thead>
-			<tr>
-				<th>Team Name</th>
-				<th>Members</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each teams as team}
+	{#if err !== ""}
+		<p>
+			{err}
+		</p>
+	{:else if loading}
+		<Loading size="64px">Loading Members...</Loading>
+	{:else if result !== null}
+		<table>
+			<thead>
 				<tr>
-					<td class="team-name">{team.name}</td>
-					<td>
-						{#each team_members[team.name] as member}
-							<div class="user-container">
-								<User user={member} />
-							</div>
-						{/each}
-					</td>
+					<th>Team Name</th>
+					<th>Members</th>
 				</tr>
-			{/each}
-		</tbody>
-	</table>
-	<p>{result.length} members found</p>
-{:else}
-	<p>No members found</p>
-{/if}
+			</thead>
+			<tbody>
+				{#each Object.entries(result) as [teamName, users]}
+					<tr>
+						<td class="team-name">{teamName}</td>
+						<td>
+							{#each users as user}
+								<div class="user-container">
+									<User {user} />
+								</div>
+							{/each}
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	{:else}
+		<p>No members found</p>
+	{/if}
 
-<Button color="green" on_click={() => get_members(true)}>
-	Hard refresh member list
-</Button>
+	<div class="button-container">
+		<Button color="blue" on_click={() => getUsers(true, "users")}>
+			Sync all users with GitHub
+		</Button>
+		<Button color="blue" on_click={() => getUsers(true, "members")}>
+			Sync repository team members with GitHub
+		</Button>
+	</div>
+</div>
 
 <style>
+	div.container {
+		margin: 8px;
+		flex: 2;
+	}
+
 	.team-name {
 		font-weight: bold;
 	}
