@@ -5,25 +5,26 @@
 	import Loading from "../../components/loading.svelte";
 
 	let err = "";
-	let result = [];
+	let result = {};
 	let loading = false;
 
-	let team_members = {};
-	let teams = [];
-
 	onMount(() => {
-		getUsers();
+		getUsers(false, "members");
 	});
 
-	async function getUsers(refresh) {
+	async function getUsers(refresh, type) {
 		try {
 			loading = true;
 			err = "";
-			result = [];
-			team_members = { none: [] };
-			teams = [{ name: "none" }];
+			result = {};
 
-			let url = "api/config/sync_users";
+			let url = "api/config/";
+
+			if (type === "users") {
+				url = url + "get_users";
+			} else {
+				url = url + "get_members";
+			}
 
 			if (refresh) {
 				url = url + "?refresh=y";
@@ -33,17 +34,6 @@
 
 			if (response.ok) {
 				result = await response.json();
-
-				result.forEach((user) => {
-					if (user.team === undefined) {
-						team_members["none"].push(user);
-					} else if (user.team.name in team_members) {
-						team_members[user.team.name].push(user);
-					} else {
-						team_members[user.team.name] = [user];
-						teams.push(user.team);
-					}
-				});
 			} else {
 				throw new Error(await response.text());
 			}
@@ -63,7 +53,7 @@
 	</p>
 {:else if loading}
 	<Loading text="Loading Members..." size="64px" />
-{:else if result.length > 0}
+{:else if result !== null}
 	<table>
 		<thead>
 			<tr>
@@ -72,13 +62,13 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#each teams as team}
+			{#each Object.entries(result) as [teamName, users]}
 				<tr>
-					<td class="team-name">{team.name}</td>
+					<td class="team-name">{teamName}</td>
 					<td>
-						{#each team_members[team.name] as member}
+						{#each users as user}
 							<div class="user-container">
-								<User user={member} />
+								<User {user} />
 							</div>
 						{/each}
 					</td>
@@ -86,15 +76,14 @@
 			{/each}
 		</tbody>
 	</table>
-	<p>{result.length} members found</p>
 {:else}
 	<p>No members found</p>
 {/if}
 
-<Button color="blue" on_click={() => getUsers(true)}>
+<Button color="blue" on_click={() => getUsers(true, "users")}>
 	Sync all users with GitHub
 </Button>
-<Button color="blue" on_click={() => getUsers(true)}>
+<Button color="blue" on_click={() => getUsers(true, "members")}>
 	Sync repository team members with GitHub
 </Button>
 

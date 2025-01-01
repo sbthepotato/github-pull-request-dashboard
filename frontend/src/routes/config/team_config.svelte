@@ -40,6 +40,7 @@
 
 	async function set_teams() {
 		const data = teams.map((team) => ({
+			slug: team.slug,
 			name: team.name,
 			repository_name: team.repository_name,
 			review_order: team.review_order,

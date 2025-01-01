@@ -37,6 +37,10 @@ func GetTeams(ctx context.Context, db *sql.DB, c *github.Client, owner string, d
 		// fetch teams again as somebody might refresh to get new teams
 		// but have existing team information that shouldn't be lost
 		teams, err := db_pkg.GetTeams(ctx, db, repositoryName)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		jsonData, err := json.Marshal(teams)
 		if err != nil {
@@ -77,6 +81,10 @@ func SetTeams(ctx context.Context, db *sql.DB) http.HandlerFunc {
 		}
 
 		err = db_pkg.UpsertTeamReviews(ctx, db, teams)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		w.Write([]byte("Team review data saved successfully"))
 	}

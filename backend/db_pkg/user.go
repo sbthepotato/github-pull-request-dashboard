@@ -3,6 +3,7 @@ package db_pkg
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/google/go-github/v68/github"
 	_ "modernc.org/sqlite"
@@ -33,7 +34,7 @@ func initUserTable(ctx context.Context, db *sql.DB) error {
 			user_login text not null,
 			repository_name text not null,
 			team_slug text not null,
-			primary key (user_login, repository_name, team_slug),
+			primary key (user_login, repository_name),
 			foreign key (user_login) references user(login),
 			foreign key (repository_name) references repository(name),
 			foreign key (team_slug) references team(slug)
@@ -77,17 +78,19 @@ func getUserQuery(ctx context.Context, db *sql.DB, repositoryName string) (*sql.
 		ctx,
 		`select 
 			user.login,
-			user.name,
+			user.name as user_name,
 			user.html_url,
 			user.avatar_url,
-			team_review.team_slug,
+			team.slug,
+			team.name as team_name,
 			team_review.review_order
 		from user
 		left join user_team on user.login = user_team.user_login 
 			and user_team.repository_name = ?
+		left join team on user_team.team_slug = team.slug	
 		left join team_review on user_team.team_slug = team_review.team_slug
 			and team_review.repository_name = ?
-		order by name asc`,
+		order by coalesce(user.name, user.login) asc`,
 		repositoryName,
 		repositoryName)
 
@@ -178,7 +181,7 @@ func UpsertUserTeams(ctx context.Context, db *sql.DB, userTeams map[string][]*gi
 /*
 get users in map where team is key
 */
-func GetUsersAsTeamMap(ctx context.Context, db *sql.DB, repositoryName string) (map[string]*User, error) {
+func GetUsersAsTeamMap(ctx context.Context, db *sql.DB, repositoryName string) (map[string][]*User, error) {
 
 	result, err := getUserQuery(ctx, db, repositoryName)
 	if err != nil {
@@ -186,7 +189,7 @@ func GetUsersAsTeamMap(ctx context.Context, db *sql.DB, repositoryName string) (
 	}
 	defer result.Close()
 
-	users := make(map[string]*User)
+	users := make(map[string][]*User)
 
 	for result.Next() {
 
@@ -194,31 +197,38 @@ func GetUsersAsTeamMap(ctx context.Context, db *sql.DB, repositoryName string) (
 
 		var (
 			userName    sql.NullString
+			teamName    sql.NullString
 			teamSlug    sql.NullString
 			reviewOrder sql.NullInt64
 		)
 
 		err := result.Scan(
 			user.User.Login,
-			userName,
+			&userName,
 			user.User.HTMLURL,
 			user.User.AvatarURL,
-			teamSlug,
-			reviewOrder,
+			&teamName,
+			&teamSlug,
+			&reviewOrder,
 		)
 		if err != nil {
+			log.Println("are we here again")
 			return nil, err
 		}
 
 		user.User.Name = nullStringToPtr(userName)
 		user.Team.Slug = nullStringToPtr(teamSlug)
-		if user.Team.Name == nil {
-			otherTeam := "other"
-			user.Team.Name = &otherTeam
-		}
+		user.Team.Name = nullStringToPtr(teamName)
 		user.Team.ReviewOrder = nullIntToPtr(reviewOrder)
 
-		users[*user.Team.Name] = user
+		mapTeamName := ""
+		if user.Team.Name == nil {
+			mapTeamName = "none"
+		} else {
+			mapTeamName = *user.Team.Name
+		}
+
+		users[mapTeamName] = append(users[mapTeamName], user)
 
 	}
 
@@ -227,7 +237,6 @@ func GetUsersAsTeamMap(ctx context.Context, db *sql.DB, repositoryName string) (
 	}
 
 	return users, nil
-
 }
 
 /*
@@ -249,17 +258,19 @@ func GetUsersAsLoginMap(ctx context.Context, db *sql.DB, repositoryName string) 
 
 		var (
 			userName    sql.NullString
+			teamName    sql.NullString
 			teamSlug    sql.NullString
 			reviewOrder sql.NullInt64
 		)
 
 		err := result.Scan(
 			user.User.Login,
-			userName,
+			&userName,
 			user.User.HTMLURL,
 			user.User.AvatarURL,
-			teamSlug,
-			reviewOrder,
+			&teamName,
+			&teamSlug,
+			&reviewOrder,
 		)
 		if err != nil {
 			return nil, err
@@ -267,6 +278,7 @@ func GetUsersAsLoginMap(ctx context.Context, db *sql.DB, repositoryName string) 
 
 		user.User.Name = nullStringToPtr(userName)
 		user.Team.Slug = nullStringToPtr(teamSlug)
+		user.Team.Name = nullStringToPtr(teamName)
 		user.Team.ReviewOrder = nullIntToPtr(reviewOrder)
 
 		users[*user.Login] = user

@@ -123,7 +123,10 @@ func GetUserTeams(ctx context.Context, db *sql.DB, c *github.Client, owner strin
 		}
 	}
 
-	db_pkg.UpsertUserTeams(ctx, db, userTeams, repositoryName)
+	err = db_pkg.UpsertUserTeams(ctx, db, userTeams, repositoryName)
+	if err != nil {
+		return nil, err
+	}
 
 	return userTeams, nil
 }

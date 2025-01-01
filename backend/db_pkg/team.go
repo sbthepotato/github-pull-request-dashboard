@@ -75,9 +75,11 @@ func CreateTeams(ctx context.Context, db *sql.DB, teams []*Team) error {
 	query, err := tx.PrepareContext(
 		ctx,
 		`insert or ignore into team (
+			slug,
 			name, 
 			html_url
 			) values (
+			?,
 			?,
 			?
 			)`)
@@ -89,7 +91,7 @@ func CreateTeams(ctx context.Context, db *sql.DB, teams []*Team) error {
 
 	for _, team := range teams {
 
-		_, err := query.ExecContext(ctx, team.Name, team.HTMLURL)
+		_, err := query.ExecContext(ctx, team.Slug, team.Name, team.HTMLURL)
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -108,13 +110,13 @@ func UpsertTeamReviews(ctx context.Context, db *sql.DB, teams []*Team) error {
 	query, err := tx.PrepareContext(
 		ctx,
 		`insert into team_review(
-			team_name,
+			team_slug,
 			repository_name,
 			review_order
 		) values (
 		?,
 		?,
-		?) on conflict (team_name, repository_name) do update set
+		?) on conflict (team_slug, repository_name) do update set
 		review_order = ?`)
 	if err != nil {
 		tx.Rollback()
@@ -124,7 +126,7 @@ func UpsertTeamReviews(ctx context.Context, db *sql.DB, teams []*Team) error {
 
 	for _, team := range teams {
 		if *team.ReviewOrder > 0 {
-			_, err := query.ExecContext(ctx, team.Name, team.RepositoryName, team.ReviewOrder, team.ReviewOrder)
+			_, err := query.ExecContext(ctx, team.Slug, team.RepositoryName, team.ReviewOrder, team.ReviewOrder)
 			if err != nil {
 				tx.Rollback()
 				return err
