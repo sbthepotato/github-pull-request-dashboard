@@ -22,7 +22,7 @@
 		if (type === "a") {
 			return;
 		} else {
-			set_url_param("created_by", user.login);
+			set_url_param("user", user.login);
 		}
 	}
 </script>

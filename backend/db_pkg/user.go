@@ -207,8 +207,8 @@ func GetUsersAsTeamMap(ctx context.Context, db *sql.DB, repositoryName string) (
 			&userName,
 			user.User.HTMLURL,
 			user.User.AvatarURL,
-			&teamName,
 			&teamSlug,
+			&teamName,
 			&reviewOrder,
 		)
 		if err != nil {
@@ -268,8 +268,8 @@ func GetUsersAsLoginMap(ctx context.Context, db *sql.DB, repositoryName string) 
 			&userName,
 			user.User.HTMLURL,
 			user.User.AvatarURL,
-			&teamName,
 			&teamSlug,
+			&teamName,
 			&reviewOrder,
 		)
 		if err != nil {

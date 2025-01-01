@@ -222,8 +222,8 @@ func GetTeamsAsMap(ctx context.Context, db *sql.DB, repositoryName string) (map[
 		team := initTeamStruct()
 
 		err := result.Scan(
-			team.Name,
 			team.Slug,
+			team.Name,
 			team.HTMLURL,
 			team.RepositoryName,
 			team.ReviewOrder,
