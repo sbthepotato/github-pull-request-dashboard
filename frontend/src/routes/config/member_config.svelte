@@ -45,49 +45,58 @@
 	}
 </script>
 
-<h2>Member Configuration</h2>
+<div class="container">
+	<h2>Member Configuration</h2>
 
-{#if err !== ""}
-	<p>
-		{err}
-	</p>
-{:else if loading}
-	<Loading text="Loading Members..." size="64px" />
-{:else if result !== null}
-	<table>
-		<thead>
-			<tr>
-				<th>Team Name</th>
-				<th>Members</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each Object.entries(result) as [teamName, users]}
+	{#if err !== ""}
+		<p>
+			{err}
+		</p>
+	{:else if loading}
+		<Loading size="64px">Loading Members...</Loading>
+	{:else if result !== null}
+		<table>
+			<thead>
 				<tr>
-					<td class="team-name">{teamName}</td>
-					<td>
-						{#each users as user}
-							<div class="user-container">
-								<User {user} />
-							</div>
-						{/each}
-					</td>
+					<th>Team Name</th>
+					<th>Members</th>
 				</tr>
-			{/each}
-		</tbody>
-	</table>
-{:else}
-	<p>No members found</p>
-{/if}
+			</thead>
+			<tbody>
+				{#each Object.entries(result) as [teamName, users]}
+					<tr>
+						<td class="team-name">{teamName}</td>
+						<td>
+							{#each users as user}
+								<div class="user-container">
+									<User {user} />
+								</div>
+							{/each}
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	{:else}
+		<p>No members found</p>
+	{/if}
 
-<Button color="blue" on_click={() => getUsers(true, "users")}>
-	Sync all users with GitHub
-</Button>
-<Button color="blue" on_click={() => getUsers(true, "members")}>
-	Sync repository team members with GitHub
-</Button>
+	<div class="button-container">
+		<Button color="blue" on_click={() => getUsers(true, "users")}>
+			Sync all users with GitHub
+		</Button>
+		<Button color="blue" on_click={() => getUsers(true, "members")}>
+			Sync repository team members with GitHub
+		</Button>
+	</div>
+</div>
 
 <style>
+	div.container {
+		margin: 8px;
+		flex: 2;
+	}
+
 	.team-name {
 		font-weight: bold;
 	}

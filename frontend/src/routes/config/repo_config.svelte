@@ -59,41 +59,50 @@
 	}
 </script>
 
-<h2>Repository Configuration</h2>
-<h3>Set the active repositories</h3>
+<div class="container">
+	<h2>Repository Configuration</h2>
+	<h3>Set the active repositories</h3>
 
-<div>
-	{#if err !== ""}
-		<p>
-			{err}
-		</p>
-	{:else if repos.length > 0}
-		<ul>
-			{#each repos as repo}
-				<li>
-					<Checkbox id={repo.name} name={repo.name} bind:checked={repo.enabled}>
-						{repo.name}
-					</Checkbox>
-				</li>
-			{/each}
-		</ul>
+	<div>
+		{#if err !== ""}
+			<p>
+				{err}
+			</p>
+		{:else if repos.length > 0}
+			<ul>
+				{#each repos as repo}
+					<li>
+						<Checkbox
+							id={repo.name}
+							name={repo.name}
+							bind:checked={repo.enabled}>
+							{repo.name}
+						</Checkbox>
+					</li>
+				{/each}
+			</ul>
 
-		<p>{repos.length} repositories found</p>
-	{/if}
+			<p>{repos.length} repositories found</p>
+		{/if}
 
-	<Button color="blue" on_click={() => getRepos(true)}>
-		Sync repositories with GitHub
-	</Button>
-	<Button color="green" on_click={() => setRepos()}>Save Repositories</Button>
+		<Button color="blue" on_click={() => getRepos(true)}>
+			Sync repositories with GitHub
+		</Button>
+		<Button color="green" on_click={() => setRepos()}>Save Repositories</Button>
 
-	{#if setResult !== ""}
-		<p>
-			{setResult}
-		</p>
-	{/if}
+		{#if setResult !== ""}
+			<p>
+				{setResult}
+			</p>
+		{/if}
+	</div>
 </div>
 
 <style>
+	div.container {
+		flex: 1;
+	}
+
 	ul {
 		list-style: none;
 		columns: 3;

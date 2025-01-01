@@ -4,6 +4,7 @@
 	import { set_url_param } from "$lib/index.js";
 
 	export let useDefault = false;
+	export let text = "";
 	let repos = [];
 	let err = "";
 	let selected = "";
@@ -66,6 +67,10 @@
 </script>
 
 {#if repos !== undefined && repos.length > 0}
+	{#if text !== ""}
+		<p>{text}</p>
+	{/if}
+
 	<select
 		bind:value={selected}
 		on:change={handleChange}

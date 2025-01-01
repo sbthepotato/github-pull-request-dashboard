@@ -19,15 +19,10 @@
 
 <Button to="/">Back to home</Button>
 
-<div class="container">
-	<RepositorySelect useDefault={true} />
-</div>
+<RepositorySelect useDefault={true} text="Select repository to configure" />
 
 <div class="container">
 	<TeamConfig {repository} />
-</div>
-
-<div class="container">
 	<MemberConfig />
 </div>
 
@@ -47,6 +42,7 @@
 
 <style>
 	div.container {
+		display: flex;
 		margin: 8px 4px 48px;
 	}
 

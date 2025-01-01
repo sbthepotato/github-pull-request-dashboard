@@ -22,21 +22,27 @@
 	}
 </script>
 
-<h2>Connection Test</h2>
+<div class="container">
+	<h2>Connection Test</h2>
 
-<p>
-	{#if err}
-		<br />
-		<span class="bad">{err}</span>
-	{:else if answer}
-		<br />
-		<span class="good">{answer}</span>
-	{/if}
-</p>
+	<p>
+		{#if err}
+			<br />
+			<span class="bad">{err}</span>
+		{:else if answer}
+			<br />
+			<span class="good">{answer}</span>
+		{/if}
+	</p>
 
-<Button color="blue" on_click={hello_go}>Say hello to the backend</Button>
+	<Button color="blue" on_click={hello_go}>Say hello to the backend</Button>
+</div>
 
 <style>
+	div.container {
+		flex: 1;
+	}
+
 	span.good {
 		color: var(--green);
 	}

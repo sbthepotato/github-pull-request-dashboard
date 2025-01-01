@@ -215,7 +215,7 @@
 	{#if err !== ""}
 		{err}
 	{:else if loading}
-		<Loading text="Loading PR list..." />
+		<Loading>Loading PR list...</Loading>
 	{:else}
 		<PRAgg {pr_list} review_teams={result.review_teams} />
 		{#if checkboxes.show_search}

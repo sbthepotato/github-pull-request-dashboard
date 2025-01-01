@@ -1,11 +1,13 @@
 <script>
 	import { onMount } from "svelte";
 	import Button from "../../components/button.svelte";
+	import Loading from "../../components/loading.svelte";
 
 	export let repository = "";
 	let teams = [];
 	let result = "";
 	let err = "";
+	let loading = false;
 
 	onMount(() => {
 		get_teams(false, repository);
@@ -13,6 +15,7 @@
 
 	async function get_teams(refresh, repository) {
 		try {
+			loading = true;
 			teams = [];
 			err = "";
 
@@ -35,6 +38,8 @@
 			}
 		} catch (error) {
 			err = error.message;
+		} finally {
+			loading = false;
 		}
 	}
 
@@ -67,51 +72,63 @@
 	$: repository, get_teams(false, repository);
 </script>
 
-<h2>Team Configuration</h2>
+<div class="container">
+	<h2>Team Configuration</h2>
 
-{#if err !== ""}
-	<p>
-		{err}
-	</p>
-{:else if teams.length > 0}
-	<table>
-		<thead>
-			<tr>
-				<th></th>
-				<th>Review Order</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each teams as team}
-				<tr>
-					<td>
-						{team.name}
-					</td>
-					<td>
-						<input
-							type="number"
-							min="0"
-							max={teams.length}
-							bind:value={team.review_order} />
-					</td>
-				</tr>
-			{/each}
-		</tbody>
-	</table>
-	<p>{teams.length} teams found</p>
-	{#if result !== ""}
+	{#if err !== ""}
 		<p>
-			{result}
+			{err}
 		</p>
+	{:else if loading}
+		<Loading size="64px">Loading teams...</Loading>
+	{:else if teams.length > 0}
+		<table>
+			<thead>
+				<tr>
+					<th></th>
+					<th>Review Order</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each teams as team}
+					<tr>
+						<td>
+							{team.name}
+						</td>
+						<td>
+							<input
+								type="number"
+								min="0"
+								max={teams.length}
+								bind:value={team.review_order} />
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+		{#if result !== ""}
+			<p>
+				{result}
+			</p>
+		{/if}
+	{:else}
+		<p>No teams found</p>
 	{/if}
-{:else}
-	<p>No teams found</p>
-{/if}
 
-<Button color="blue" on_click={() => get_teams(true)}>
-	Sync teams with GitHub
-</Button>
-<Button color="green" on_click={() => set_teams()}>Save Teams</Button>
+	<div class="button-container">
+		<Button color="blue" on_click={() => get_teams(true)}>
+			Sync teams with GitHub
+		</Button>
+		<Button color="green" on_click={() => set_teams()}>Save Teams</Button>
+	</div>
+</div>
 
 <style>
+	div.container {
+		margin: 8px;
+		flex: 1;
+	}
+
+	div.button-container {
+	}
 </style>
