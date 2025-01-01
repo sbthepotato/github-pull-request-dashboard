@@ -23,7 +23,7 @@
 
 <div class="container">
 	<TeamConfig {repository} />
-	<MemberConfig />
+	<MemberConfig {repository} />
 </div>
 
 <div class="container">

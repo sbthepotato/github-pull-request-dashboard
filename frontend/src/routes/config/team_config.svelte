@@ -2,6 +2,7 @@
 	import { onMount } from "svelte";
 	import Button from "../../components/button.svelte";
 	import Loading from "../../components/loading.svelte";
+	import { boolToString } from "$lib/index.js";
 
 	export let repository = "";
 	let teams = [];
@@ -19,17 +20,12 @@
 			teams = [];
 			err = "";
 
-			let url = "api/config/get_teams";
-
-			if (refresh) {
-				url = url + "?refresh=y";
-			}
-
-			if (repository !== undefined && repository !== "") {
-				url = url + "?repo=" + repository;
-			}
-
-			const response = await fetch(url);
+			const response = await fetch(
+				"api/config/get_teams?refresh=" +
+					boolToString(refresh) +
+					"&repo=" +
+					repository,
+			);
 
 			if (response.ok) {
 				teams = await response.json();

@@ -79,6 +79,13 @@ export function string_to_bool(string, otherwise = false) {
 	}
 }
 
+export function boolToString(bool) {
+	if (bool) {
+		return "y";
+	}
+	return "n";
+}
+
 export function get_pretty_date(date_str) {
 	const date = new Date(date_str);
 	return date.toLocaleString("en-us", date_options);

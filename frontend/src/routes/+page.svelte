@@ -5,6 +5,7 @@
 		set_many_url_params,
 		set_url_param,
 		string_to_bool,
+		boolToString,
 	} from "$lib/index.js";
 
 	import Button from "../components/button.svelte";
@@ -66,21 +67,12 @@
 			result = {};
 			pr_list = {};
 
-			let url = "api/dashboard/get_pr_list";
-
-			if (refresh) {
-				url = url + "?refresh=y";
-			}
-
-			if (
-				repository !== undefined &&
-				repository !== null &&
-				repository !== ""
-			) {
-				url = url + "?repo=" + repository;
-			}
-
-			const response = await fetch(url);
+			const response = await fetch(
+				"api/dashboard/get_pr_list?refresh=" +
+					boolToString(refresh) +
+					"&repo=" +
+					repository,
+			);
 
 			if (response.ok) {
 				result = await response.json();

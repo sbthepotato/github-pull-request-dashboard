@@ -3,7 +3,9 @@
 	import User from "../../components/user.svelte";
 	import Button from "../../components/button.svelte";
 	import Loading from "../../components/loading.svelte";
+	import { boolToString } from "$lib/index.js";
 
+	export let repository = "";
 	let err = "";
 	let result = {};
 	let loading = false;
@@ -18,19 +20,14 @@
 			err = "";
 			result = {};
 
-			let url = "api/config/";
-
-			if (type === "users") {
-				url = url + "get_users";
-			} else {
-				url = url + "get_members";
-			}
-
-			if (refresh) {
-				url = url + "?refresh=y";
-			}
-
-			const response = await fetch(url);
+			const response = await fetch(
+				"api/config/get_users?refresh=" +
+					boolToString(refresh) +
+					"&type=" +
+					type +
+					"&repo=" +
+					repository,
+			);
 
 			if (response.ok) {
 				result = await response.json();

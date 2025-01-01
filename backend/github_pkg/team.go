@@ -51,14 +51,3 @@ func GetTeams(ctx context.Context, db *sql.DB, c *github.Client, owner string) (
 
 	return teams, nil
 }
-
-/* func writeTeams(teams []*CustomTeam) error {
-	jsonData, err := json.Marshal(teams)
-	if err != nil {
-		return err
-	}
-
-	db_pkg.Write("teams", jsonData)
-
-	return nil
-} */

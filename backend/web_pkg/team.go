@@ -22,7 +22,7 @@ func GetTeams(ctx context.Context, db *sql.DB, c *github.Client, owner string, d
 		refresh := r.URL.Query().Get("refresh")
 		repositoryName := r.URL.Query().Get("repo")
 
-		if repositoryName == "" {
+		if repositoryName == "" || repositoryName == "null" {
 			repositoryName = defaultRepo
 		}
 
