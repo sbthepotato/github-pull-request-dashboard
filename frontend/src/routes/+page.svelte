@@ -35,6 +35,13 @@
 
 		get_pr_list(false, repository);
 
+		// temporary warning because of the rename
+		if ($page.url.searchParams.get("created_by")) {
+			window.alert(
+				"the created by filter has been renamed to user, please delete your current bookmark and make a new one.",
+			);
+		}
+
 		user_filter = $page.url.searchParams.get("user");
 
 		auto_reload = string_to_bool(
