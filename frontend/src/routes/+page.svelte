@@ -142,7 +142,7 @@
 					(pr.title.toLowerCase().includes(search_query) ||
 						pr.awaiting?.toLowerCase().includes(search_query) ||
 						pr.created_by.login.toLowerCase().includes(search_query) ||
-						pr.created_by.name.toLowerCase().includes(search_query) ||
+						pr.created_by.name?.toLowerCase().includes(search_query) ||
 						pr.base.label.toLowerCase().includes(search_query) ||
 						pr.number.toString().includes(search_query) ||
 						pr.review_overview?.some(

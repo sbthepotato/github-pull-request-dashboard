@@ -144,7 +144,14 @@ func processPullRequest(prChannel chan<- *db_pkg.PullRequest,
 		}
 	}
 
-	resultPr.CreatedBy = users[*detailedPr.User.Login]
+	if val, ok := users[*detailedPr.User.Login]; ok {
+		resultPr.CreatedBy = val
+	} else {
+		user := new(db_pkg.User)
+		user.User = detailedPr.User
+		resultPr.CreatedBy = user
+	}
+
 	resultPr.ReviewOverview = make([]*db_pkg.Review, 0)
 	resultPr.Index = &idx
 	currentPriority := 100
