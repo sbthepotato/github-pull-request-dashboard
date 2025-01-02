@@ -27,7 +27,7 @@ func GetUsers(ctx context.Context, db *sql.DB, c *github.Client, owner string, d
 		syncType := r.URL.Query().Get("type")
 		repositoryName := r.URL.Query().Get("repo")
 
-		if repositoryName == "" || repositoryName == "null" {
+		if repositoryName == "" || repositoryName == "null" || repositoryName == "undefined" {
 			repositoryName = defaultRepoName
 		}
 
