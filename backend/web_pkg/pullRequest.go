@@ -24,7 +24,7 @@ func GetPullRequests(ctx context.Context, db *sql.DB, c *github.Client, owner st
 		refresh := r.URL.Query().Get("refresh")
 
 		repo := r.URL.Query().Get("repo")
-		if repo == "" || repo == "null" {
+		if repo == "" || repo == "null" || repo == "undefined" {
 			repo = defaultRepo
 		}
 
