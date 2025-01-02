@@ -11,8 +11,10 @@
 		if (to) {
 			const url_prefix = import.meta.env.VITE_URL_PATH;
 			const params = $page.url.searchParams.toString();
-			const fullUrl = params ? `${url_prefix+to}?${params}` : url_prefix+to;
-			goto(fullUrl);
+			if (url_prefix !== undefined) {
+				to = url_prefix+to
+			}
+			goto(params ? `${to}?${params}` : to);
 		} else {
 			on_click(event);
 		}
