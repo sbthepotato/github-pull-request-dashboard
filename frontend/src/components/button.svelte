@@ -9,8 +9,9 @@
 
 	function click_handler(event) {
 		if (to) {
+			const url_prefix = import.meta.env.VITE_URL_PATH;
 			const params = $page.url.searchParams.toString();
-			const fullUrl = params ? `${to}?${params}` : to;
+			const fullUrl = params ? `${url_prefix+to}?${params}` : url_prefix+to;
 			goto(fullUrl);
 		} else {
 			on_click(event);
