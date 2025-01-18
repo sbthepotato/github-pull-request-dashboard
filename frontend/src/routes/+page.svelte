@@ -238,7 +238,7 @@
 
 <section class="buttons">
 	<Button color="grey" to="/config">Config</Button>
-	<Button color="blue" on_click={() => getPullRequests(true)}>
+	<Button color="blue" on_click={() => getPullRequests(true, repository)}>
 		Refresh PR List
 	</Button>
 	<RepositorySelect />
