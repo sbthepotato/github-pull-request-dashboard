@@ -17,15 +17,22 @@ jobs:
       run:
         working-directory: ./backend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v5.2.0
         with:
-          go-version: "1.23.4"
+          go-version: "1.23.5"
 
       - name: install dependencies
         run: go get .
 
-      - name: Build
-        run: go build -v ./...
+      - name: Build Windows executable
+        run: |
+          GOOS=windows GOARCH=amd64 go build -o github-pull-request-dashboard.exe
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4.6.0
+        with:
+          name: github-pull-request-dashboard-windows-executable
+          path: github-pull-request-dashboard.exe

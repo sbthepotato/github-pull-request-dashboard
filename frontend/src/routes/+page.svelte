@@ -112,38 +112,78 @@
 			(user_filter !== null || search_query !== "") &&
 			result.pull_requests !== undefined
 		) {
-			pr_list = result.pull_requests.filter(
-				(pr) =>
-					(user_filter === null ||
-						pr.created_by.login === user_filter ||
-						pr.review_overview?.some(
-							(review) =>
-								review.user?.login === user_filter &&
-								review.state === "REVIEW_REQUESTED" &&
-								pr.awaiting !== "Changes Requested",
-						) ||
-						(pr.unassigned === true &&
-							pr.created_by.login != user_filter &&
-							pr.awaiting === user_filter_object.team?.name &&
-							pr.awaiting !== "Changes Requested")) &&
-					(pr.title.toLowerCase().includes(search_query) ||
-						pr.awaiting?.toLowerCase().includes(search_query) ||
-						pr.created_by.login.toLowerCase().includes(search_query) ||
-						pr.created_by.name?.toLowerCase().includes(search_query) ||
-						pr.base.label.toLowerCase().includes(search_query) ||
-						pr.number.toString().includes(search_query) ||
-						pr.review_overview?.some(
-							(review) =>
-								review.state === "REVIEW_REQUESTED" &&
-								(review.user?.login.toLowerCase().includes(search_query) ||
-									review.user?.name.toLowerCase().includes(search_query)),
-						) ||
-						pr.labels?.some((label) =>
-							label.name.toLowerCase().includes(search_query),
-						)),
-			);
+			let cleaned_query = "";
+			let anti_search = false;
 
-			if (user_filter !== null) {
+			if (search_query[0] === "!") {
+				cleaned_query = search_query.substring(1);
+				anti_search = true;
+			} else {
+				cleaned_query = search_query;
+			}
+
+			if (anti_search) {
+				pr_list = result.pull_requests.filter(
+					(pr) =>
+						(user_filter === null ||
+							pr.created_by.login === user_filter ||
+							pr.review_overview?.some(
+								(review) =>
+									review.user?.login === user_filter &&
+									review.state === "REVIEW_REQUESTED" &&
+									pr.awaiting !== "Changes Requested",
+							) ||
+							(pr.unassigned === true &&
+								pr.created_by.login != user_filter &&
+								pr.awaiting === user_filter_object.team?.name &&
+								pr.awaiting !== "Changes Requested")) &&
+						!pr.title.toLowerCase().includes(cleaned_query) &&
+						!pr.awaiting?.toLowerCase().includes(cleaned_query) &&
+						!pr.created_by.login.toLowerCase().includes(cleaned_query) &&
+						!pr.created_by.name?.toLowerCase().includes(cleaned_query) &&
+						!pr.base.label.toLowerCase().includes(cleaned_query) &&
+						!pr.number.toString().includes(cleaned_query) &&
+						!pr.review_overview?.some(
+							(review) =>
+								review.state === "REVIEW_REQUESTED" &&
+								review.user?.login.toLowerCase().includes(cleaned_query) &&
+								review.user?.name.toLowerCase().includes(cleaned_query),
+						) &&
+						!pr.labels?.some((label) =>
+							label.name.toLowerCase().includes(cleaned_query),
+						),
+				);
+			} else {
+				pr_list = result.pull_requests.filter(
+					(pr) =>
+						(user_filter === null ||
+							pr.created_by.login === user_filter ||
+							pr.review_overview?.some(
+								(review) =>
+									review.user?.login === user_filter &&
+									review.state === "REVIEW_REQUESTED" &&
+									pr.awaiting !== "Changes Requested",
+							) ||
+							(pr.unassigned === true &&
+								pr.created_by.login != user_filter &&
+								pr.awaiting === user_filter_object.team?.name &&
+								pr.awaiting !== "Changes Requested")) &&
+						(pr.title.toLowerCase().includes(cleaned_query) ||
+							pr.awaiting?.toLowerCase().includes(cleaned_query) ||
+							pr.created_by.login.toLowerCase().includes(cleaned_query) ||
+							pr.created_by.name?.toLowerCase().includes(cleaned_query) ||
+							pr.base.label.toLowerCase().includes(cleaned_query) ||
+							pr.number.toString().includes(cleaned_query) ||
+							pr.review_overview?.some(
+								(review) =>
+									review.state === "REVIEW_REQUESTED" &&
+									(review.user?.login.toLowerCase().includes(cleaned_query) ||
+										review.user?.name.toLowerCase().includes(cleaned_query)),
+							) ||
+							pr.labels?.some((label) =>
+								label.name.toLowerCase().includes(cleaned_query),
+							)),
+				);
 			}
 		} else {
 			pr_list = result.pull_requests;
@@ -205,32 +245,40 @@
 			<PRTable {pr_list} />
 		{:else if user_filter !== null}
 			<PRTable
-				title="Created by {user_filter}"
-				pr_list={pr_list?.filter(
-					(pr) => pr.created_by.login === user_filter,
-				)} />
+				pr_list={pr_list?.filter((pr) => pr.created_by.login === user_filter)}>
+				{#if user_filter_object.name}
+					Created by {user_filter_object.name}
+				{:else}
+					Created by @{user_filter}
+				{/if}
+			</PRTable>
 
 			<PRTable
-				title="{user_filter} requested reviewer"
 				pr_list={pr_list?.filter((pr) =>
 					pr.review_overview?.some(
 						(review) =>
 							review.user?.login === user_filter &&
 							review.state === "REVIEW_REQUESTED",
 					),
-				)} />
+				)}>
+				{#if user_filter_object.name}
+					{user_filter_object.name} requested reviewer
+				{:else}
+					@{user_filter} requested reviewer
+				{/if}
+			</PRTable>
 
 			{#if user_filter_object.team}
 				<PRTable
 					show_empty={false}
-					title="Waiting on {user_filter_object.team
-						.name} - Not assigned to anyone else"
 					pr_list={pr_list?.filter(
 						(pr) =>
 							pr.unassigned === true &&
 							pr.created_by.login != user_filter &&
 							pr.awaiting === user_filter_object.team.name,
-					)} />
+					)}>
+					Waiting on {user_filter_object.team.name} - Not assigned to anyone else
+				</PRTable>
 			{/if}
 		{/if}
 	{/if}
@@ -238,7 +286,7 @@
 
 <section class="buttons">
 	<Button color="grey" to="/config">Config</Button>
-	<Button color="blue" on_click={() => getPullRequests(true)}>
+	<Button color="blue" on_click={() => getPullRequests(true, repository)}>
 		Refresh PR List
 	</Button>
 	<RepositorySelect />

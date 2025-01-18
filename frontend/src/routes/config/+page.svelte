@@ -19,7 +19,7 @@
 
 <Button to="/">Back to home</Button>
 
-<RepositorySelect useDefault={true} text="Select repository to configure" />
+<RepositorySelect>Select repository to configure</RepositorySelect>
 
 <div class="container">
 	<TeamConfig {repository} />
