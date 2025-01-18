@@ -3,8 +3,6 @@
 	import { page } from "$app/stores";
 	import { setUrlParam } from "$lib/index.js";
 
-	export let useDefault = false;
-	export let text = "";
 	let repos = [];
 	let err = "";
 	let selected = "";
@@ -36,7 +34,6 @@
 
 	async function getDefaultRepo() {
 		if (
-			useDefault &&
 			(!selected || selected === "") &&
 			repos !== undefined &&
 			repos.length > 0
@@ -49,7 +46,6 @@
 
 				if (response.ok) {
 					selected = await response.text();
-					handleChange();
 				} else {
 					throw new Error(await response.text());
 				}
@@ -67,16 +63,22 @@
 </script>
 
 {#if repos !== undefined && repos.length > 0}
-	{#if text !== ""}
-		<p>{text}</p>
-	{/if}
+	<div class="container">
+		<p><slot></slot></p>
 
-	<select
-		bind:value={selected}
-		on:change={handleChange}
-		on:input={handleChange}>
-		{#each repos as repo}
-			<option value={repo.name}>{repo.name}</option>
-		{/each}
-	</select>
+		<select
+			bind:value={selected}
+			on:change={handleChange}
+			on:input={handleChange}>
+			{#each repos as repo}
+				<option value={repo.name}>{repo.name}</option>
+			{/each}
+		</select>
+	</div>
 {/if}
+
+<style>
+	div.container {
+		display: inline;
+	}
+</style>
