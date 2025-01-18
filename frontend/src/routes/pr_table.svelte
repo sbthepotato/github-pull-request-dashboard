@@ -7,7 +7,6 @@
 	import Icon from "../components/icon.svelte";
 
 	export let pr_list = [];
-	export let title = "";
 	export let show_empty = true;
 
 	let size = "12px";
@@ -15,7 +14,7 @@
 
 {#if show_empty || (pr_list != undefined && pr_list.length > 0)}
 	<div class="container">
-		<p class="title">{title}</p>
+		<p class="title"><slot></slot></p>
 		{#if pr_list != undefined && pr_list.length > 0}
 			<table>
 				<tbody>

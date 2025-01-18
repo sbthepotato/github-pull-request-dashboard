@@ -245,32 +245,40 @@
 			<PRTable {pr_list} />
 		{:else if user_filter !== null}
 			<PRTable
-				title="Created by {user_filter}"
-				pr_list={pr_list?.filter(
-					(pr) => pr.created_by.login === user_filter,
-				)} />
+				pr_list={pr_list?.filter((pr) => pr.created_by.login === user_filter)}>
+				{#if user_filter_object.name}
+					Created by {user_filter_object.name}
+				{:else}
+					Created by @{user_filter}
+				{/if}
+			</PRTable>
 
 			<PRTable
-				title="{user_filter} requested reviewer"
 				pr_list={pr_list?.filter((pr) =>
 					pr.review_overview?.some(
 						(review) =>
 							review.user?.login === user_filter &&
 							review.state === "REVIEW_REQUESTED",
 					),
-				)} />
+				)}>
+				{#if user_filter_object.name}
+					{user_filter_object.name} requested reviewer
+				{:else}
+					@{user_filter} requested reviewer
+				{/if}
+			</PRTable>
 
 			{#if user_filter_object.team}
 				<PRTable
 					show_empty={false}
-					title="Waiting on {user_filter_object.team
-						.name} - Not assigned to anyone else"
 					pr_list={pr_list?.filter(
 						(pr) =>
 							pr.unassigned === true &&
 							pr.created_by.login != user_filter &&
 							pr.awaiting === user_filter_object.team.name,
-					)} />
+					)}>
+					Waiting on {user_filter_object.team.name} - Not assigned to anyone else
+				</PRTable>
 			{/if}
 		{/if}
 	{/if}

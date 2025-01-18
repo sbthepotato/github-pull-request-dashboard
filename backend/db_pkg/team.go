@@ -125,12 +125,10 @@ func UpsertTeamReviews(ctx context.Context, db *sql.DB, teams []*Team) error {
 	defer query.Close()
 
 	for _, team := range teams {
-		if *team.ReviewOrder > 0 {
-			_, err := query.ExecContext(ctx, team.Slug, team.RepositoryName, team.ReviewOrder, team.ReviewOrder)
-			if err != nil {
-				tx.Rollback()
-				return err
-			}
+		_, err := query.ExecContext(ctx, team.Slug, team.RepositoryName, team.ReviewOrder, team.ReviewOrder)
+		if err != nil {
+			tx.Rollback()
+			return err
 		}
 	}
 
