@@ -222,8 +222,12 @@
 	}
 	$: if (auto_reload) {
 		setUrlParam("auto_reload", "y");
+		reload_interval = setInterval(function () {
+			getPullRequests(false, repository);
+		}, 600000);
 	} else {
 		setUrlParam("auto_reload");
+		clearInterval(reload_interval);
 	}
 </script>
 
