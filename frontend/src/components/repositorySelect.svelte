@@ -79,6 +79,6 @@
 
 <style>
 	div.container {
-		display: inline;
+		display: inline-block;
 	}
 </style>
