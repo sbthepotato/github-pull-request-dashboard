@@ -291,7 +291,10 @@ func GetPullRequests(ctx context.Context, db *sql.DB, c *github.Client, owner st
 		}
 
 		// if the pr was updated longer ago than the last fetch then we don't need to re-fetch it
-		if prevResult.Updated != nil && pr.UpdatedAt.GetTime().Before(*prevResult.Updated) {
+		if prevResult.Updated != nil &&
+			pr.UpdatedAt.GetTime().Before(*prevResult.Updated) &&
+			previousPrMap[*pr.Number].Error == nil {
+
 			savedPr := previousPrMap[*pr.Number]
 			tempIdx := idx
 			savedPr.Index = &tempIdx
