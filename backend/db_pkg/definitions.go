@@ -46,8 +46,7 @@ type PullRequest struct {
 	ReviewOverview []*Review `json:"review_overview,omitempty"`
 	Awaiting       *string   `json:"awaiting,omitempty"`
 	Unassigned     *bool     `json:"unassigned,omitempty"`
-	ErrorMessage   *string   `json:"error_message,omitempty"`
-	ErrorText      *string   `json:"error_text,omitempty"`
+	Error          *string   `json:"error,omitempty"`
 	Index          *int      `json:"-"`
 }
 

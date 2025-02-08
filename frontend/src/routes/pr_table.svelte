@@ -77,10 +77,10 @@
 								</span>
 							</td>
 							<td class="awaiting">
-								{#if pr.awaiting != "error" && pr.error_message != undefined}
-									<PrAwaiting awaiting="error" message={pr.error_message} />
+								{#if pr.awaiting != "error" && pr.error != undefined}
+									<PrAwaiting awaiting="error" message={pr.error} />
 								{/if}
-								<PrAwaiting awaiting={pr.awaiting} message={pr.error_message} />
+								<PrAwaiting awaiting={pr.awaiting} message={pr.error} />
 							</td>
 							<td class="review_overview">
 								{#if pr.review_overview !== undefined}
