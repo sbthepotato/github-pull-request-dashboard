@@ -26,7 +26,7 @@
 					"&type=" +
 					type +
 					"&repo=" +
-					repository,
+					repository ?? null,
 			);
 
 			if (response.ok) {

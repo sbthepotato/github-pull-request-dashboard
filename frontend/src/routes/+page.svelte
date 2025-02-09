@@ -66,7 +66,7 @@
 				"api/dashboard/get_pr_list?refresh=" +
 					boolToString(refresh) +
 					"&repo=" +
-					repository,
+					repository ?? null,
 			);
 
 			if (response.ok) {
