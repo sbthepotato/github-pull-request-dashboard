@@ -61,6 +61,9 @@ func initTeamStruct() *Team {
 	return team
 }
 
+/*
+get all the team slugs
+*/
 func getTeamsSlugsAsSlice(ctx context.Context, db *sql.DB) ([]string, error) {
 
 	result, err := db.QueryContext(
@@ -80,7 +83,7 @@ func getTeamsSlugsAsSlice(ctx context.Context, db *sql.DB) ([]string, error) {
 
 		slug := ""
 
-		err := result.Scan(slug)
+		err := result.Scan(&slug)
 		if err != nil {
 			return nil, err
 		}
@@ -99,7 +102,7 @@ func getTeamsSlugsAsSlice(ctx context.Context, db *sql.DB) ([]string, error) {
 
 /*
 create many team rows in single transaction
-if a team row exists in the db but is missing in the new slice of teams then it will be automatically deleted
+if a team exists in the db but is missing in the new slice of teams then it will be automatically deleted
 */
 func CreateTeams(ctx context.Context, db *sql.DB, teams []*Team) error {
 	var err error
@@ -205,6 +208,13 @@ func UpsertTeamReviews(ctx context.Context, db *sql.DB, teams []*Team) error {
 			tx.Rollback()
 			return err
 		}
+	}
+
+	_, err = tx.QueryContext(ctx,
+		`delete from team_review where review_order = 0`)
+	if err != nil {
+		tx.Rollback()
+		return err
 	}
 
 	return tx.Commit()

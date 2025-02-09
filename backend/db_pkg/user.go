@@ -97,10 +97,47 @@ func getUserQuery(ctx context.Context, db *sql.DB, repositoryName string) (*sql.
 	return result, err
 }
 
+/*
+get all the user logins
+*/
+func getUserLoginAsSlice(ctx context.Context, db *sql.DB) ([]string, error) {
+	result, err := db.QueryContext(
+		ctx,
+		`select user.login
+		from user
+		order by user.login asc`)
+
+	if err != nil {
+		return nil, err
+	}
+	defer result.Close()
+
+	logins := make([]string, 0)
+
+	for result.Next() {
+
+		login := ""
+
+		err := result.Scan(&login)
+		if err != nil {
+			return nil, err
+		}
+
+		logins = append(logins, login)
+	}
+
+	if err := result.Err(); err != nil {
+		return nil, err
+	}
+
+	return logins, nil
+}
+
 /**** public ****/
 
 /*
 create many user rows in single transaction
+if a user exists in the db but is missing in the new slice the old user will automatically be deleted
 */
 func CreateUsers(ctx context.Context, db *sql.DB, users []*User) error {
 	tx, err := db.Begin()
@@ -127,9 +164,39 @@ func CreateUsers(ctx context.Context, db *sql.DB, users []*User) error {
 	}
 	defer query.Close()
 
+	newLogins := make([]string, 0)
+
 	for _, user := range users {
 
+		newLogins = append(newLogins, *user.User.Login)
+
 		_, err := query.ExecContext(ctx, user.User.Login, user.User.Name, user.User.HTMLURL, user.User.AvatarURL)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	oldLogins, err := getUserLoginAsSlice(ctx, db)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	deletedLogins := findExtraElements(newLogins, oldLogins)
+
+	for _, login := range deletedLogins {
+		_, err = tx.QueryContext(ctx,
+			`delete from user_team where user_login = ?`,
+			login)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		_, err = tx.QueryContext(ctx,
+			`delete from user where user_login = ?`,
+			login)
 		if err != nil {
 			tx.Rollback()
 			return err
