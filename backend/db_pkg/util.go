@@ -3,6 +3,7 @@ package db_pkg
 import (
 	"context"
 	"database/sql"
+	"slices"
 
 	_ "modernc.org/sqlite"
 )
@@ -50,4 +51,21 @@ func nullStringToPtr(value sql.NullString) *string {
 		return &value.String
 	}
 	return nil
+}
+
+/*
+find list of elements that exist in oldData that do not exist in newData
+returns the list of different elements
+*/
+func findExtraElements(newData []string, oldData []string) []string {
+
+	result := make([]string, 0)
+
+	for _, element := range oldData {
+		if !slices.Contains(newData, element) {
+			result = append(result, element)
+		}
+	}
+
+	return result
 }
