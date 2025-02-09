@@ -211,6 +211,10 @@ func UpsertTeamReviews(ctx context.Context, db *sql.DB, teams []*Team) error {
 	}
 
 	_, err = tx.QueryContext(ctx,
+		`delete from user_team where team_slug in (
+		select team_slug from team_review where review_order = 0)`)
+
+	_, err = tx.QueryContext(ctx,
 		`delete from team_review where review_order = 0`)
 	if err != nil {
 		tx.Rollback()
