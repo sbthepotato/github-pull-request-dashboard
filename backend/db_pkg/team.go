@@ -61,12 +61,52 @@ func initTeamStruct() *Team {
 	return team
 }
 
+/*
+get all the team slugs
+*/
+func getTeamsSlugsAsSlice(ctx context.Context, db *sql.DB) ([]string, error) {
+
+	result, err := db.QueryContext(
+		ctx,
+		`select team.slug
+		from team
+		order by team.slug asc`)
+
+	if err != nil {
+		return nil, err
+	}
+	defer result.Close()
+
+	slugs := make([]string, 0)
+
+	for result.Next() {
+
+		slug := ""
+
+		err := result.Scan(&slug)
+		if err != nil {
+			return nil, err
+		}
+
+		slugs = append(slugs, slug)
+	}
+
+	if err := result.Err(); err != nil {
+		return nil, err
+	}
+
+	return slugs, nil
+}
+
 /**** public ****/
 
 /*
 create many team rows in single transaction
+if a team exists in the db but is missing in the new slice of teams then it will be automatically deleted
 */
 func CreateTeams(ctx context.Context, db *sql.DB, teams []*Team) error {
+	var err error
+
 	tx, err := db.Begin()
 	if err != nil {
 		return err
@@ -89,9 +129,47 @@ func CreateTeams(ctx context.Context, db *sql.DB, teams []*Team) error {
 	}
 	defer query.Close()
 
+	newSlugs := make([]string, 0)
+
 	for _, team := range teams {
 
+		newSlugs = append(newSlugs, *team.Slug)
+
 		_, err := query.ExecContext(ctx, team.Slug, team.Name, team.HTMLURL)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	oldSlugs, err := getTeamsSlugsAsSlice(ctx, db)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	deletedSlugs := findExtraElements(newSlugs, oldSlugs)
+
+	for _, slug := range deletedSlugs {
+		_, err = tx.QueryContext(ctx,
+			`delete from user_team where team_slug = ?`,
+			slug)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		_, err = tx.QueryContext(ctx,
+			`delete from team_review where team_slug = ?`,
+			slug)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		_, err = tx.QueryContext(ctx,
+			`delete from team where team_slug = ?`,
+			slug)
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -130,6 +208,17 @@ func UpsertTeamReviews(ctx context.Context, db *sql.DB, teams []*Team) error {
 			tx.Rollback()
 			return err
 		}
+	}
+
+	_, err = tx.QueryContext(ctx,
+		`delete from user_team where team_slug in (
+		select team_slug from team_review where review_order = 0)`)
+
+	_, err = tx.QueryContext(ctx,
+		`delete from team_review where review_order = 0`)
+	if err != nil {
+		tx.Rollback()
+		return err
 	}
 
 	return tx.Commit()

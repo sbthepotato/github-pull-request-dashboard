@@ -24,7 +24,7 @@
 				"api/config/get_teams?refresh=" +
 					boolToString(refresh) +
 					"&repo=" +
-					repository,
+					repository ?? null,
 			);
 
 			if (response.ok) {

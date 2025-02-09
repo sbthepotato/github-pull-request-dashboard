@@ -7,7 +7,6 @@ import (
 	"log"
 	"slices"
 	"sort"
-	"strconv"
 	"sync"
 	"time"
 
@@ -32,14 +31,12 @@ func processPullRequest(prChannel chan<- *db_pkg.PullRequest,
 
 	defer wg.Done()
 
-	var ErrorMessage string
-	var ErrorText string
+	var errorMessage string
 
 	detailedPr, _, err := c.PullRequests.Get(ctx, owner, repositoryName, *pr.Number)
 	if err != nil {
-		ErrorText = ErrorText + err.Error()
-		ErrorMessage = ErrorMessage + "error fetching detailed pr info for pr " + strconv.Itoa(*pr.Number)
-		log.Println(ErrorMessage, err.Error())
+		errorMessage = err.Error()
+		log.Println(errorMessage, err.Error())
 	}
 
 	if *detailedPr.Draft {
@@ -105,12 +102,11 @@ func processPullRequest(prChannel chan<- *db_pkg.PullRequest,
 	for {
 		respReviews, resp, err := c.PullRequests.ListReviews(ctx, owner, repositoryName, *detailedPr.Number, opt)
 		if err != nil {
-			ErrorText = ErrorText + err.Error()
-			ErrorMessage = ErrorMessage + "error fetching pull request reviews for pr " + strconv.Itoa(*pr.Number)
 			teamOther = "error"
 			resultPr.Awaiting = &teamOther
 
-			log.Println(ErrorMessage, err.Error())
+			errorMessage = errorMessage + err.Error()
+			log.Println(errorMessage, err.Error())
 		}
 
 		reviews = append(reviews, respReviews...)
@@ -221,10 +217,8 @@ func processPullRequest(prChannel chan<- *db_pkg.PullRequest,
 		}
 	}
 
-	if ErrorMessage != "" {
-		ErrorMessage = ErrorMessage + ". See the console on the server or the errorText field in the network tab for more information"
-		resultPr.ErrorMessage = &ErrorMessage
-		resultPr.ErrorText = &ErrorText
+	if errorMessage != "" {
+		resultPr.Error = &errorMessage
 	}
 
 	prChannel <- resultPr
@@ -297,7 +291,10 @@ func GetPullRequests(ctx context.Context, db *sql.DB, c *github.Client, owner st
 		}
 
 		// if the pr was updated longer ago than the last fetch then we don't need to re-fetch it
-		if prevResult.Updated != nil && pr.UpdatedAt.GetTime().Before(*prevResult.Updated) {
+		if prevResult.Updated != nil &&
+			pr.UpdatedAt.GetTime().Before(*prevResult.Updated) &&
+			previousPrMap[*pr.Number].Error == nil {
+
 			savedPr := previousPrMap[*pr.Number]
 			tempIdx := idx
 			savedPr.Index = &tempIdx
