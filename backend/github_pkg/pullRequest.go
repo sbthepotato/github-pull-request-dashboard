@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/go-github/v68/github"
+	"github.com/google/go-github/v69/github"
 )
 
 /**** private ****/
@@ -232,6 +232,10 @@ get list of github pull requests and process them with review information
 */
 func GetPullRequests(ctx context.Context, db *sql.DB, c *github.Client, owner string, RepositoryName string, prevResult *db_pkg.PullRequestInfo) (*db_pkg.PullRequestInfo, error) {
 
+	currentTime := time.Now()
+	result := new(db_pkg.PullRequestInfo)
+	result.Updated = &currentTime
+
 	if prevResult == nil {
 		prevResult = new(db_pkg.PullRequestInfo)
 	}
@@ -307,8 +311,6 @@ func GetPullRequests(ctx context.Context, db *sql.DB, c *github.Client, owner st
 		idx++ // manual index as we are skipping draft
 	}
 
-	result := new(db_pkg.PullRequestInfo)
-
 	// sort the list of teams for the aggregation banner
 	if teams != nil {
 		slugs := make([]string, 0, len(teams))
@@ -355,8 +357,6 @@ func GetPullRequests(ctx context.Context, db *sql.DB, c *github.Client, owner st
 	}
 
 	result.PullRequests = prs
-	currentTime := time.Now()
-	result.Updated = &currentTime
 
 	return result, nil
 
