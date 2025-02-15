@@ -38,7 +38,7 @@
 
 <footer>
 	made by sbthepotato | <a
-		href="https://github.com/sbthepotato/gh-pull-request-dashboard"
+		href="https://github.com/sbthepotato/github-pull-request-dashboard"
 		target="_blank">GitHub Repository</a>
 </footer>
 
