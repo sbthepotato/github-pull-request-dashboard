@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/go-github/v68/github"
+	"github.com/google/go-github/v69/github"
 )
 
 var cachedPrListResults map[string]*db_pkg.PullRequestInfo
