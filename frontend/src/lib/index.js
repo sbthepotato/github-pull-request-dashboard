@@ -89,3 +89,15 @@ export function getPrettyDate(date_str) {
 	const date = new Date(date_str);
 	return date.toLocaleString("en-us", date_options);
 }
+
+export function addLinks(text, replaceList) {
+	result = text;
+
+	replaceList.forEach((item) => {
+		result = result.replace(item.pattern, (match, p1) => {
+			return "<a href=" + item.link + `${p1} target="_blank">${match}</a>`;
+		});
+	});
+
+	return result;
+}

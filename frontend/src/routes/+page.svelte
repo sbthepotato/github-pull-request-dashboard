@@ -1,7 +1,12 @@
 <script>
 	import { onDestroy, onMount } from "svelte";
 	import { page } from "$app/stores";
-	import { setUrlParam, stringToBool, boolToString } from "$lib/index.js";
+	import {
+		setUrlParam,
+		stringToBool,
+		boolToString,
+		addLinks,
+	} from "$lib/index.js";
 
 	import Button from "../components/button.svelte";
 	import Checkbox from "../components/checkbox.svelte";
@@ -71,6 +76,15 @@
 
 			if (response.ok) {
 				result = await response.json();
+
+				if (result.title_replace && result.title_replace.length > 0) {
+					result.pull_requests = result.pull_requests.map((pr) => {
+						return {
+							...pr,
+							title: addLinks(pr.title, result.title_replace),
+						};
+					});
+				}
 
 				pr_list = result.pull_requests;
 			} else {
