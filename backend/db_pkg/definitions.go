@@ -7,6 +7,15 @@ import (
 )
 
 /*
+title regex
+*/
+type TitleRegex struct {
+	Table_regex_id *int    `json:"table_regex_id,omitempty"`
+	Regex_pattern  *string `json:"regex_pattern,omitempty"`
+	Link           *string `json:"link,omitempty"`
+}
+
+/*
 repository with enabled field
 */
 type Repository struct {
