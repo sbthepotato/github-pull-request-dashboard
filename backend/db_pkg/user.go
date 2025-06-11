@@ -9,6 +9,11 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+type User struct {
+	*github.User
+	Team *Team `json:"team,omitempty"`
+}
+
 /**** private ****/
 
 /*
@@ -50,7 +55,7 @@ func initUserTable(ctx context.Context, db *sql.DB) error {
 /*
 create empty user struct with db fields
 */
-func initUserStruct() *User {
+func (*User) init() {
 	user := new(User)
 
 	user.User = new(github.User)
@@ -66,7 +71,6 @@ func initUserStruct() *User {
 	user.Team.Team.Slug = new(string)
 	user.Team.Team.Name = new(string)
 
-	return user
 }
 
 /*
@@ -260,7 +264,8 @@ func GetUsersAsTeamMap(ctx context.Context, db *sql.DB, repositoryName string) (
 
 	for result.Next() {
 
-		user := initUserStruct()
+		user := new(User)
+		user.init()
 
 		var (
 			userName    sql.NullString
@@ -321,7 +326,8 @@ func GetUsersAsLoginMap(ctx context.Context, db *sql.DB, repositoryName string) 
 
 	for result.Next() {
 
-		user := initUserStruct()
+		user := new(User)
+		user.init()
 
 		var (
 			userName    sql.NullString

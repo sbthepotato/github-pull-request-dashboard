@@ -8,6 +8,11 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+type Repository struct {
+	*github.Repository
+	Enabled *bool `json:"enabled,omitempty"`
+}
+
 /**** private ****/
 
 /*
@@ -40,7 +45,7 @@ func initRepositoryTable(ctx context.Context, db *sql.DB) error {
 /*
 create a repository struct with the db fields
 */
-func initRepositoryStruct() *Repository {
+func (*Repository) init() {
 	repository := new(Repository)
 	repository.Repository = new(github.Repository)
 	repository.Name = new(string)
@@ -48,7 +53,6 @@ func initRepositoryStruct() *Repository {
 	repository.HTMLURL = new(string)
 	repository.Enabled = new(bool)
 
-	return repository
 }
 
 /**** public ****/
@@ -152,7 +156,8 @@ func GetRepositories(ctx context.Context, db *sql.DB, activeOnly bool) ([]*Repos
 
 	for result.Next() {
 
-		repository := initRepositoryStruct()
+		repository := new(Repository)
+		repository.init()
 
 		err := result.Scan(
 			repository.Name,

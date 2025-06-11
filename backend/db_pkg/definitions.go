@@ -7,38 +7,8 @@ import (
 )
 
 /*
-title regex
+	The following definitions don't fit in any of the normal packages
 */
-type TitleRegex struct {
-	Table_regex_id *int    `json:"table_regex_id,omitempty"`
-	Regex_pattern  *string `json:"regex_pattern,omitempty"`
-	Link           *string `json:"link,omitempty"`
-}
-
-/*
-repository with enabled field
-*/
-type Repository struct {
-	*github.Repository
-	Enabled *bool `json:"enabled,omitempty"`
-}
-
-/*
-Team with review info
-*/
-type Team struct {
-	*github.Team
-	RepositoryName *string `json:"repository_name,omitempty"`
-	ReviewOrder    *int    `json:"review_order,omitempty"`
-}
-
-/*
-User with a Custom Team attached
-*/
-type User struct {
-	*github.User
-	Team *Team `json:"team,omitempty"`
-}
 
 type Review struct {
 	User  *User   `json:"user,omitempty"`
@@ -46,9 +16,6 @@ type Review struct {
 	State *string `json:"state,omitempty"`
 }
 
-/*
-Pull Request with extra fields for custom objects
-*/
 type PullRequest struct {
 	*github.PullRequest
 	CreatedBy      *User     `json:"created_by,omitempty"`
@@ -59,9 +26,6 @@ type PullRequest struct {
 	Index          *int      `json:"-"`
 }
 
-/*
-Pull Request list with accompanying information for list
-*/
 type PullRequestInfo struct {
 	PullRequests []*PullRequest `json:"pull_requests,omitempty"`
 	ReviewTeams  []*Team        `json:"review_teams,omitempty"`
