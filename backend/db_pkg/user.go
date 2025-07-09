@@ -55,8 +55,7 @@ func initUserTable(ctx context.Context, db *sql.DB) error {
 /*
 create empty user struct with db fields
 */
-func (*User) init() {
-	user := new(User)
+func (user *User) init() {
 
 	user.User = new(github.User)
 	user.User.Login = new(string)

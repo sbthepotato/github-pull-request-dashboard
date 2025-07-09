@@ -35,12 +35,11 @@ func initConfigTable(ctx context.Context, db *sql.DB) error {
 
 }
 
-func (*TitleRegex) init() {
-	TitleRegex := new(TitleRegex)
+func (titleRegex *TitleRegex) init() {
 
-	TitleRegex.TitleRegexId = new(int)
-	TitleRegex.RegexPattern = new(string)
-	TitleRegex.Link = new(string)
+	titleRegex.TitleRegexId = new(int)
+	titleRegex.RegexPattern = new(string)
+	titleRegex.Link = new(string)
 }
 
 /**** public ****/

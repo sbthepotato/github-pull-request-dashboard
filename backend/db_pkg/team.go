@@ -53,8 +53,7 @@ func initTeamTable(ctx context.Context, db *sql.DB) error {
 /*
 create empty team struct with db fields
 */
-func (*Team) init() {
-	team := new(Team)
+func (team *Team) init() {
 
 	team.RepositoryName = new(string)
 	team.ReviewOrder = new(int)

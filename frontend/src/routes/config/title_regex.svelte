@@ -15,10 +15,10 @@
 			result = {};
 			err = "";
 
-			const response = await fetch("api/config/title_regex");
+			const response = await fetch("api/config/get_title_regex_list");
 
 			if (response.ok) {
-				answer = await response.json();
+				result = await response.json();
 			} else {
 				throw new Error(await response.text());
 			}
@@ -29,14 +29,14 @@
 </script>
 
 <div class="container">
-	<h2>Title Regex</h2>
+	<h3>Title Regex</h3>
 	<p>Enter regex patterns and a link to insert with the pattern</p>
 	{#if err !== ""}
 		<p>
 			{err}
 		</p>
 	{:else if loading}
-		<Loading size="64px">Loading Members...</Loading>
+		<Loading size="64px">Loading title regex list...</Loading>
 	{:else if result !== null}
 		<table>
 			<thead>
@@ -55,8 +55,6 @@
 			</tbody>
 		</table>
 	{/if}
-
-	<Button color="blue" on_click={helloGo}>Say hello to the backend</Button>
 </div>
 
 <style>

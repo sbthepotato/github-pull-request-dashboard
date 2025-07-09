@@ -33,11 +33,13 @@ func main() {
 	http.HandleFunc("/config/get_default_repository", web_pkg.GetDefaultRepository(ctx, defaultRepository))
 	http.HandleFunc("/config/get_teams", web_pkg.GetTeams(ctx, db, client, owner, defaultRepository))
 	http.HandleFunc("/config/get_users", web_pkg.GetUsers(ctx, db, client, owner, defaultRepository))
+	http.HandleFunc("/config/get_title_regex_list", web_pkg.GetTitleRegexList(ctx, db))
 	http.HandleFunc("/dashboard/get_pr_list", web_pkg.GetPullRequests(ctx, db, client, owner, defaultRepository))
 
 	// POSTS
 	http.HandleFunc("/config/set_repos", web_pkg.SetRepositories(ctx, db))
 	http.HandleFunc("/config/set_teams", web_pkg.SetTeams(ctx, db))
+	http.HandleFunc("/config/set_regex", web_pkg.SetTitleRegex(ctx, db))
 
 	cors_handler := web_pkg.EnableCors(http.DefaultServeMux)
 

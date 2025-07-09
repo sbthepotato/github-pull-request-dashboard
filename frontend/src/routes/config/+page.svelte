@@ -5,6 +5,7 @@
 	import HelloGo from "./hello_go.svelte";
 	import RepoConfig from "./repo_config.svelte";
 	import TeamConfig from "./team_config.svelte";
+	import TitleRegexConfig from "./title_regex.svelte";
 	import MemberConfig from "./member_config.svelte";
 	import RepositorySelect from "../../components/repositorySelect.svelte";
 
@@ -19,22 +20,29 @@
 
 <Button to="/">Back to home</Button>
 
-<div>
-	<RepositorySelect>Select repository to configure</RepositorySelect>
-</div>
+<section>
+	<h2>Server Configuration</h2>
+	<div>
+		<RepositorySelect>Select repository to configure</RepositorySelect>
+	</div>
 
-<div class="container">
-	<TeamConfig {repository} />
-	<MemberConfig {repository} />
-</div>
+	<div class="container">
+		<TeamConfig {repository} />
+		<MemberConfig {repository} />
+	</div>
 
-<div class="container">
-	<RepoConfig />
-</div>
+	<div class="container">
+		<RepoConfig />
+	</div>
 
-<div class="container">
-	<HelloGo />
-</div>
+	<div class="container">
+		<TitleRegexConfig />
+	</div>
+
+	<div class="container">
+		<HelloGo />
+	</div>
+</section>
 
 <footer>
 	made by sbthepotato | <a

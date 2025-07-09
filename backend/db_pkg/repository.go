@@ -45,8 +45,7 @@ func initRepositoryTable(ctx context.Context, db *sql.DB) error {
 /*
 create a repository struct with the db fields
 */
-func (*Repository) init() {
-	repository := new(Repository)
+func (repository *Repository) init() {
 	repository.Repository = new(github.Repository)
 	repository.Name = new(string)
 	repository.DefaultBranch = new(string)
