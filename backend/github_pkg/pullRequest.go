@@ -39,7 +39,7 @@ func processPullRequest(prChannel chan<- *db_pkg.PullRequest,
 		log.Println(errorMessage, err.Error())
 	}
 
-	if *detailedPr.Draft {
+	if detailedPr.Draft != nil && *detailedPr.Draft {
 		*detailedPr.State = "draft"
 	}
 
