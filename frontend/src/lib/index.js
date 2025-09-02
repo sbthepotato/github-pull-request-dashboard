@@ -91,11 +91,11 @@ export function getPrettyDate(date_str) {
 }
 
 export function addLinks(text, replaceList) {
-	result = text;
+	let result = text;
 
 	replaceList.forEach((item) => {
-		result = result.replace(item.pattern, (match, p1) => {
-			return "<a href=" + item.link + `${p1} target="_blank">${match}</a>`;
+		result = result.replace(new RegExp(item.pattern, "g"), (match, p1) => {
+			return `<a href="${`${item.link}${p1}`}" target="_blank">${match}</a>`;
 		});
 	});
 

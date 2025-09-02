@@ -38,19 +38,11 @@
 
 	input {
 		display: inline-block;
-		background-color: var(--content-bg-alt);
-		color: var(--text);
-		border: none;
 		box-sizing: border-box;
 		padding: 8px 16px;
 		border-radius: 4px;
 		width: 35vw;
 		min-width: 256px;
-	}
-
-	input:focus {
-		outline: none;
-		border: 1px solid var(--border-blue);
 	}
 
 	.no-rounding {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/google/go-github/v72/github"
+	"github.com/google/go-github/v73/github"
 	_ "modernc.org/sqlite"
 )
 

@@ -98,3 +98,27 @@ table tr:last-child td:first-child {
 table tr:last-child td:last-child {
 	border-bottom-right-radius: 8px;
 }
+
+code {
+	background-color: var(--blue-bg);
+	border-radius: 4px;
+	padding: 4px;
+}
+
+input {
+	background-color: var(--content-bg-alt);
+	color: var(--text);
+	border: none;
+}
+
+input:focus {
+	outline: none;
+	border: 1px solid var(--border-blue);
+}
+
+input::-webkit-search-decoration,
+input::-webkit-search-cancel-button,
+input::-webkit-search-results-button,
+input::-webkit-search-results-decoration {
+	-webkit-appearance: none;
+}
