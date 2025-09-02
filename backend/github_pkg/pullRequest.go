@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/go-github/v73/github"
+	"github.com/google/go-github/v74/github"
 )
 
 /**** private ****/
@@ -39,7 +39,7 @@ func processPullRequest(prChannel chan<- *db_pkg.PullRequest,
 		log.Println(errorMessage, err.Error())
 	}
 
-	if *detailedPr.Draft {
+	if detailedPr.Draft != nil && *detailedPr.Draft {
 		*detailedPr.State = "draft"
 	}
 
