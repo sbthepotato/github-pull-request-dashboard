@@ -1,6 +1,6 @@
 module github-pull-request-dashboard
 
-go 1.24.4
+go 1.24.0
 
 require (
 	github.com/google/go-github/v74 v74.0.0
