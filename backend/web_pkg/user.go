@@ -8,7 +8,7 @@ import (
 	"github-pull-request-dashboard/github_pkg"
 	"net/http"
 
-	"github.com/google/go-github/v69/github"
+	"github.com/google/go-github/v74/github"
 )
 
 /*
