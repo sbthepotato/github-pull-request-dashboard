@@ -6,7 +6,7 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v69/github"
+	"github.com/google/go-github/v74/github"
 	"github.com/joho/godotenv"
 )
 
