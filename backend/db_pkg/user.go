@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v80/github"
 	_ "modernc.org/sqlite"
 )
 
@@ -198,7 +198,7 @@ func CreateUsers(ctx context.Context, db *sql.DB, users []*User) error {
 		}
 
 		_, err = tx.QueryContext(ctx,
-			`delete from user where user_login = ?`,
+			`delete from user where login = ?`,
 			login)
 		if err != nil {
 			tx.Rollback()

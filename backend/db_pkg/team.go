@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v80/github"
 	_ "modernc.org/sqlite"
 )
 
@@ -196,10 +196,11 @@ func UpsertTeamReviews(ctx context.Context, db *sql.DB, teams []*Team) error {
 			repository_name,
 			review_order
 		) values (
-		?,
-		?,
-		?) on conflict (team_slug, repository_name) do update set
-		review_order = ?`)
+			?,
+			?,
+			?
+		) on conflict (team_slug, repository_name) do update set
+			review_order = ?`)
 	if err != nil {
 		tx.Rollback()
 		return err

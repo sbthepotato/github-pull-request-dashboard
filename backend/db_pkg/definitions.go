@@ -3,7 +3,7 @@ package db_pkg
 import (
 	"time"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v80/github"
 )
 
 /*
@@ -18,6 +18,7 @@ type Review struct {
 
 type PullRequest struct {
 	*github.PullRequest
+	HtmlTitle      *string   `json:"html_title,omitempty"`
 	CreatedBy      *User     `json:"created_by,omitempty"`
 	ReviewOverview []*Review `json:"review_overview,omitempty"`
 	Awaiting       *string   `json:"awaiting,omitempty"`

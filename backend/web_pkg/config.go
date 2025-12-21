@@ -71,6 +71,18 @@ func SetTitleRegex(ctx context.Context, db *sql.DB) http.HandlerFunc {
 			return
 		}
 
+		cachedRegexList, err := db_pkg.GetTitleRegexList(ctx, db)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		cachedRegexJson, err = json.Marshal(cachedRegexList)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		w.Write([]byte("Title regex data saved successfully"))
 
 	}
