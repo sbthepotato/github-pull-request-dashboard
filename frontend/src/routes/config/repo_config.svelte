@@ -65,8 +65,8 @@
 </script>
 
 <div class="container">
-	<h2>Repository Configuration</h2>
-	<h3>Set the active repositories</h3>
+	<h3>Repository Configuration</h3>
+	<h4>Set the active repositories</h4>
 
 	<div>
 		{#if err !== ""}

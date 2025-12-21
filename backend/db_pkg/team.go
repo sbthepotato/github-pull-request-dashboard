@@ -4,9 +4,15 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v80/github"
 	_ "modernc.org/sqlite"
 )
+
+type Team struct {
+	*github.Team
+	RepositoryName *string `json:"repository_name,omitempty"`
+	ReviewOrder    *int    `json:"review_order,omitempty"`
+}
 
 /**** private ****/
 
@@ -47,8 +53,7 @@ func initTeamTable(ctx context.Context, db *sql.DB) error {
 /*
 create empty team struct with db fields
 */
-func initTeamStruct() *Team {
-	team := new(Team)
+func (team *Team) init() {
 
 	team.RepositoryName = new(string)
 	team.ReviewOrder = new(int)
@@ -58,7 +63,6 @@ func initTeamStruct() *Team {
 	team.Team.Name = new(string)
 	team.Team.HTMLURL = new(string)
 
-	return team
 }
 
 /*
@@ -192,10 +196,11 @@ func UpsertTeamReviews(ctx context.Context, db *sql.DB, teams []*Team) error {
 			repository_name,
 			review_order
 		) values (
-		?,
-		?,
-		?) on conflict (team_slug, repository_name) do update set
-		review_order = ?`)
+			?,
+			?,
+			?
+		) on conflict (team_slug, repository_name) do update set
+			review_order = ?`)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -253,7 +258,8 @@ func GetTeams(ctx context.Context, db *sql.DB, repositoryName string) ([]*Team, 
 
 	for result.Next() {
 
-		team := initTeamStruct()
+		team := new(Team)
+		team.init()
 
 		err := result.Scan(
 			team.Slug,
@@ -306,7 +312,8 @@ func GetTeamsAsMap(ctx context.Context, db *sql.DB, repositoryName string) (map[
 
 	for result.Next() {
 
-		team := initTeamStruct()
+		team := new(Team)
+		team.init()
 
 		err := result.Scan(
 			team.Slug,

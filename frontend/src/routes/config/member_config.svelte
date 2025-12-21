@@ -43,7 +43,7 @@
 </script>
 
 <div class="container">
-	<h2>Member Configuration</h2>
+	<h3>Member Configuration</h3>
 
 	{#if err !== ""}
 		<p>

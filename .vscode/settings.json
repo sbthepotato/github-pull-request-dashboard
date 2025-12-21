@@ -1,0 +1,11 @@
+{
+	"editor.insertSpaces": false,
+	"editor.defaultFormatter": "prettier.prettier-vscode",
+	"[go]": {
+		"editor.defaultFormatter": "golang.go"
+	},
+	"[svelte]": {
+		"editor.defaultFormatter": "svelte.svelte-vscode"
+	},
+	"editor.formatOnSave": true
+}

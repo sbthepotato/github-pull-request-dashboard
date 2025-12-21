@@ -14,6 +14,11 @@ func InitDatabase(ctx context.Context) (*sql.DB, error) {
 		return nil, err
 	}
 
+	err = initConfigTable(ctx, db)
+	if err != nil {
+		return nil, err
+	}
+
 	err = initRepositoryTable(ctx, db)
 	if err != nil {
 		return nil, err

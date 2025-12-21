@@ -5,9 +5,14 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v80/github"
 	_ "modernc.org/sqlite"
 )
+
+type User struct {
+	*github.User
+	Team *Team `json:"team,omitempty"`
+}
 
 /**** private ****/
 
@@ -50,8 +55,7 @@ func initUserTable(ctx context.Context, db *sql.DB) error {
 /*
 create empty user struct with db fields
 */
-func initUserStruct() *User {
-	user := new(User)
+func (user *User) init() {
 
 	user.User = new(github.User)
 	user.User.Login = new(string)
@@ -66,7 +70,6 @@ func initUserStruct() *User {
 	user.Team.Team.Slug = new(string)
 	user.Team.Team.Name = new(string)
 
-	return user
 }
 
 /*
@@ -195,7 +198,7 @@ func CreateUsers(ctx context.Context, db *sql.DB, users []*User) error {
 		}
 
 		_, err = tx.QueryContext(ctx,
-			`delete from user where user_login = ?`,
+			`delete from user where login = ?`,
 			login)
 		if err != nil {
 			tx.Rollback()
@@ -260,7 +263,8 @@ func GetUsersAsTeamMap(ctx context.Context, db *sql.DB, repositoryName string) (
 
 	for result.Next() {
 
-		user := initUserStruct()
+		user := new(User)
+		user.init()
 
 		var (
 			userName    sql.NullString
@@ -321,7 +325,8 @@ func GetUsersAsLoginMap(ctx context.Context, db *sql.DB, repositoryName string) 
 
 	for result.Next() {
 
-		user := initUserStruct()
+		user := new(User)
+		user.init()
 
 		var (
 			userName    sql.NullString

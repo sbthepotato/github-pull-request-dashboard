@@ -5,12 +5,13 @@ import (
 	"database/sql"
 	"github-pull-request-dashboard/db_pkg"
 	"log"
+	"regexp"
 	"slices"
 	"sort"
 	"sync"
 	"time"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v80/github"
 )
 
 /**** private ****/
@@ -27,6 +28,7 @@ func processPullRequest(prChannel chan<- *db_pkg.PullRequest,
 	pr *github.PullRequest,
 	users map[string]*db_pkg.User,
 	teams map[string]*db_pkg.Team,
+	titleRegexList []*db_pkg.TitleRegex,
 	idx int) {
 
 	defer wg.Done()
@@ -221,6 +223,12 @@ func processPullRequest(prChannel chan<- *db_pkg.PullRequest,
 		resultPr.Error = &errorMessage
 	}
 
+	for _, item := range titleRegexList {
+		re := regexp.MustCompile(*item.RegexPattern)
+		result := re.ReplaceAllString(*resultPr.Title, `<a href="`+*item.Link+`${1}" target="_blank">${0}</a>`)
+		resultPr.HtmlTitle = &result
+	}
+
 	prChannel <- resultPr
 
 }
@@ -284,6 +292,11 @@ func GetPullRequests(ctx context.Context, db *sql.DB, c *github.Client, owner st
 		return nil, err
 	}
 
+	titleRegexList, err := db_pkg.GetTitleRegexList(ctx, db)
+	if err != nil {
+		return nil, err
+	}
+
 	var wg sync.WaitGroup
 	idx := 0
 	prChannel := make(chan *db_pkg.PullRequest)
@@ -305,7 +318,7 @@ func GetPullRequests(ctx context.Context, db *sql.DB, c *github.Client, owner st
 			cachedPrList = append(cachedPrList, savedPr)
 		} else {
 			wg.Add(1)
-			go processPullRequest(prChannel, &wg, ctx, c, owner, RepositoryName, pr, users, teams, idx)
+			go processPullRequest(prChannel, &wg, ctx, c, owner, RepositoryName, pr, users, teams, titleRegexList, idx)
 		}
 
 		idx++ // manual index as we are skipping draft

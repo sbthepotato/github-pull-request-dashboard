@@ -3,33 +3,12 @@ package db_pkg
 import (
 	"time"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v80/github"
 )
 
 /*
-repository with enabled field
+	The following definitions don't fit in any of the normal packages
 */
-type Repository struct {
-	*github.Repository
-	Enabled *bool `json:"enabled,omitempty"`
-}
-
-/*
-Team with review info
-*/
-type Team struct {
-	*github.Team
-	RepositoryName *string `json:"repository_name,omitempty"`
-	ReviewOrder    *int    `json:"review_order,omitempty"`
-}
-
-/*
-User with a Custom Team attached
-*/
-type User struct {
-	*github.User
-	Team *Team `json:"team,omitempty"`
-}
 
 type Review struct {
 	User  *User   `json:"user,omitempty"`
@@ -37,11 +16,9 @@ type Review struct {
 	State *string `json:"state,omitempty"`
 }
 
-/*
-Pull Request with extra fields for custom objects
-*/
 type PullRequest struct {
 	*github.PullRequest
+	HtmlTitle      *string   `json:"html_title,omitempty"`
 	CreatedBy      *User     `json:"created_by,omitempty"`
 	ReviewOverview []*Review `json:"review_overview,omitempty"`
 	Awaiting       *string   `json:"awaiting,omitempty"`
@@ -50,9 +27,6 @@ type PullRequest struct {
 	Index          *int      `json:"-"`
 }
 
-/*
-Pull Request list with accompanying information for list
-*/
 type PullRequestInfo struct {
 	PullRequests []*PullRequest `json:"pull_requests,omitempty"`
 	ReviewTeams  []*Team        `json:"review_teams,omitempty"`

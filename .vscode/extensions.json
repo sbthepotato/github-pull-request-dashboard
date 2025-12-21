@@ -1,0 +1,7 @@
+{
+	"recommendations": [
+		"prettier.prettier-vscode",
+		"golang.go",
+		"svelte.svelte-vscode"
+	]
+}

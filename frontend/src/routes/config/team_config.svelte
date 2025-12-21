@@ -69,7 +69,7 @@
 </script>
 
 <div class="container">
-	<h2>Team Configuration</h2>
+	<h3>Team Configuration</h3>
 
 	{#if err !== ""}
 		<p>

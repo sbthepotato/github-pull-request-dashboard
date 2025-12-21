@@ -29,7 +29,7 @@
 							</td>
 
 							<td class="title">
-								<span class="pr-title">{pr.title}</span>
+								<span class="pr-title">{@html pr.html_title}</span>
 								{#if pr.labels != undefined}
 									<span class="tags">
 										{#each pr.labels as label}
