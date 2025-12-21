@@ -7,11 +7,6 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-type Config struct {
-	Organisation      *string `json:"organisation,omitempty"`
-	DefaultRepository *string `json:"default_repository,omitempty"`
-}
-
 type TitleRegex struct {
 	TitleRegexId   *int    `json:"title_regex_id,omitempty"`
 	RegexPattern   *string `json:"regex_pattern,omitempty"`
@@ -25,15 +20,8 @@ type TitleRegex struct {
 initialize the config table
 */
 func initConfigTable(ctx context.Context, db *sql.DB) error {
-	_, err := db.ExecContext(
-		ctx,
-		`create table if not exists config (
-			organisation text primary key not null,
-			default_repository text not null,
-		)`,
-	)
 
-	_, err = db.ExecContext(
+	_, err := db.ExecContext(
 		ctx,
 		`create table if not exists title_regex (
 			title_regex_id integer primary key not null,
