@@ -225,13 +225,7 @@ func processPullRequest(prChannel chan<- *db_pkg.PullRequest,
 
 	for _, item := range titleRegexList {
 		re := regexp.MustCompile(*item.RegexPattern)
-		log.Println(*item.RegexPattern)
-
-		replacement := `<a href="` + *item.Link + `${1}" target="_blank">${0}</a>`
-		log.Println(replacement)
-
-		result := re.ReplaceAllString(*resultPr.Title, replacement)
-		log.Println(result)
+		result := re.ReplaceAllString(*resultPr.Title, `<a href="`+*item.Link+`${1}" target="_blank">${0}</a>`)
 		resultPr.HtmlTitle = &result
 	}
 
