@@ -78,13 +78,16 @@
 		{:else if repos.length > 0}
 			<ul>
 				{#each repos as repo}
-					<li>
-						<Checkbox
-							id={repo.name}
-							name={repo.name}
-							bind:checked={repo.enabled}>
-							{repo.name}
-						</Checkbox>
+					<li class:enabled={repo.enabled}>
+						<label for={repo.name} class="list-item">
+							<Checkbox
+								id={repo.name}
+								name={repo.name}
+								show_checkbox={false}
+								bind:checked={repo.enabled}>
+								{repo.name}
+							</Checkbox>
+						</label>
 					</li>
 				{/each}
 			</ul>
@@ -115,7 +118,31 @@
 		columns: 3;
 	}
 
+	li:first-child {
+		margin-top: 0;
+	}
+
+	li:last-child {
+		margin-bottom: 0;
+	}
+
 	li {
 		padding: 12px;
+		margin: 12px;
+		outline: 1px solid var(--text-alt);
+		border-radius: 8px;
+	}
+
+	li.enabled {
+		background-color: var(--blue-bg);
+		outline: 1px solid var(--border-blue);
+		font-weight: bold;
+	}
+
+	label.list-item {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		cursor: pointer;
 	}
 </style>

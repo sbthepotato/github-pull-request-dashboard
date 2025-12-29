@@ -21,7 +21,18 @@
 <Button to="/">Back to home</Button>
 
 <section>
+	<h2>Client Configuration</h2>
+	<p>
+		Configure settings that will be saved in cookies and only apply to the
+		current client
+	</p>
+</section>
+
+<section>
 	<h2>Server Configuration</h2>
+	<p>
+		Configure settings that will be saved on the server and apply for everyone
+	</p>
 	<div>
 		<RepositorySelect>Select repository to configure</RepositorySelect>
 	</div>
