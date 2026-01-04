@@ -55,7 +55,7 @@ func processPullRequest(prChannel chan<- *db_pkg.PullRequest,
 	statusApproved := "APPROVED"
 	teamOther := "other"
 
-	if teams == nil || len(teams) == 0 {
+	if len(teams) == 0 {
 		teamOther = "review"
 	}
 
