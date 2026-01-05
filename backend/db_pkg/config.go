@@ -3,6 +3,7 @@ package db_pkg
 import (
 	"context"
 	"database/sql"
+	"regexp"
 
 	_ "modernc.org/sqlite"
 )
@@ -27,8 +28,20 @@ func initConfigTable(ctx context.Context, db *sql.DB) error {
 			title_regex_id integer primary key not null,
 			regex_pattern text not null,
 			link text not null,
-			repository_name text,
-			foreign key (repository_name) references repository(name)
+		)`,
+	)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.ExecContext(
+		ctx,
+		`create table if not exists title_regex_repository (
+			title_regex_repository_id integer primary key not null,
+			title_regex_id integer not null,
+			repository_name text not null,
+			foreign key title_regex_id references title_regex(title_regex_id),
+			foreign key repository_name references repository(name)
 		)`,
 	)
 	if err != nil {
@@ -77,7 +90,13 @@ func UpsertTitleRegex(ctx context.Context, db *sql.DB, titleRegexes []*TitleRege
 
 	for _, titleRegex := range titleRegexes {
 		if *titleRegex.RegexPattern != "" && *titleRegex.Link != "" {
-			_, err := query.ExecContext(
+
+			_, err := regexp.Compile(*titleRegex.RegexPattern)
+			if err != nil {
+				return err
+			}
+
+			_, err = query.ExecContext(
 				ctx,
 				titleRegex.TitleRegexId,
 				titleRegex.RegexPattern,
