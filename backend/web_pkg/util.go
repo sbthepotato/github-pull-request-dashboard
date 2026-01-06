@@ -1,9 +1,14 @@
 package web_pkg
 
 import (
+	"context"
+	"encoding/json"
+	"github-pull-request-dashboard/github_pkg"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/google/go-github/v80/github"
 )
 
 var mu sync.Mutex
@@ -44,4 +49,27 @@ Hello World from the backend
 func HelloGo(w http.ResponseWriter, r *http.Request) {
 	setHeaders(&w, "text")
 	w.Write([]byte("Hello, from the golang backend " + time.Now().String()))
+}
+
+func GetRateLimit(ctx context.Context, c *github.Client) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		setHeaders(&w, "json")
+
+		mu.Lock()
+		defer mu.Unlock()
+
+		rateLimit, err := github_pkg.GetApiLimit(ctx, c)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		jsonData, err := json.Marshal(rateLimit)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(jsonData)
+	}
 }

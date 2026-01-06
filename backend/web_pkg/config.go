@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"github-pull-request-dashboard/db_pkg"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 var cachedRegexJson []byte
@@ -85,5 +87,33 @@ func SetTitleRegex(ctx context.Context, db *sql.DB) http.HandlerFunc {
 
 		w.Write([]byte("Title regex data saved successfully"))
 
+	}
+}
+
+func DeleteTitleRegex(ctx context.Context, db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		setHeaders(&w, "text")
+
+		mu.Lock()
+		defer mu.Unlock()
+
+		if r.Method != http.MethodPost {
+			http.Error(w, "invalid request method", http.StatusMethodNotAllowed)
+			return
+		}
+
+		titleRegexId, err := strconv.Atoi(r.URL.Query().Get("titleRegexId"))
+		if err != nil {
+			http.Error(w, "Failed to read Title Regex ID", http.StatusInternalServerError)
+			return
+		}
+
+		err = db_pkg.DeleteTitleRegex(ctx, db, titleRegexId)
+		if err != nil {
+			http.Error(w, "Failed to delete Title Regex Entry", http.StatusInternalServerError)
+			return
+		}
+
+		w.Write([]byte(fmt.Sprintf("Deleted Title Regex with ID: %d", titleRegexId)))
 	}
 }

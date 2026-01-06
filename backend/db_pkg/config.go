@@ -27,7 +27,7 @@ func initConfigTable(ctx context.Context, db *sql.DB) error {
 		`create table if not exists title_regex (
 			title_regex_id integer primary key not null,
 			regex_pattern text not null,
-			link text not null,
+			link text not null
 		)`,
 	)
 	if err != nil {
@@ -40,8 +40,8 @@ func initConfigTable(ctx context.Context, db *sql.DB) error {
 			title_regex_repository_id integer primary key not null,
 			title_regex_id integer not null,
 			repository_name text not null,
-			foreign key title_regex_id references title_regex(title_regex_id),
-			foreign key repository_name references repository(name)
+			foreign key (title_regex_id) references title_regex(title_regex_id),
+			foreign key (repository_name) references repository(name)
 		)`,
 	)
 	if err != nil {
@@ -153,4 +153,25 @@ func GetTitleRegexList(ctx context.Context, db *sql.DB) ([]*TitleRegex, error) {
 
 	return result, nil
 
+}
+
+func DeleteTitleRegex(ctx context.Context, db *sql.DB, titleRegexId int) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.QueryContext(ctx, `delete from title_regex_repository where title_regex_id = ?`, titleRegexId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = tx.QueryContext(ctx, `delete from title_regex where title_regex_id = ?`, titleRegexId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
 }

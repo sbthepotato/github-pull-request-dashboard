@@ -8,6 +8,7 @@
 	import TitleRegexConfig from "./title_regex.svelte";
 	import MemberConfig from "./member_config.svelte";
 	import RepositorySelect from "../../components/repositorySelect.svelte";
+	import RateLimit from "./rate_limit.svelte";
 
 	let repository = "";
 
@@ -52,6 +53,10 @@
 
 	<div class="container">
 		<HelloGo />
+	</div>
+
+	<div class="container">
+		<RateLimit />
 	</div>
 </section>
 

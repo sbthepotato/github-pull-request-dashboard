@@ -59,6 +59,27 @@
 			err = error.message;
 		}
 	}
+
+	async function deleteTitleRegex(TitleRegexId) {
+		try {
+			err = "";
+			result = "";
+
+			const response = await fetch(
+				"api/config/delete_regex?titleRegexId=" + TitleRegexId,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+				},
+			);
+
+			result = await response.text();
+		} catch (error) {
+			err = error.message;
+		}
+	}
 </script>
 
 <div class="container">
@@ -104,7 +125,10 @@
 							<input type="text" bind:value={entry.repository_name} />
 						</td>
 						<td>
-							<button color="red">delete</button>
+							<button
+								color="red"
+								on_click={() => deleteTitleRegex(entry.title_regex_id)}
+								>delete</button>
 						</td>
 					</tr>
 				{/each}
