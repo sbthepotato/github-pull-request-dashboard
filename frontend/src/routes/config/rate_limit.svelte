@@ -24,24 +24,20 @@
 </script>
 
 <div class="container">
-	<h2>rate limit check</h2>
+	<h2>Rate Limit Check</h2>
 
-	<div>
-		<ul>
-			{#each Object.entries(answer) as [key, value]}
-				<li>
-					<strong>{key}</strong>
-					<ul>
-						{#each Object.entries(value) as [childKey, childValue]}
-							<li>{childKey} - {childValue}</li>
-						{/each}
-					</ul>
-				</li>
-			{/each}
-		</ul>
+	<div class="flex-container">
+		{#each Object.entries(answer) as [key, value]}
+			<code class="flex-item" class:used={answer.used > 0}>
+				<strong>{key}</strong>
 
-		<Button color="blue" on_click={get}>check rate limit</Button>
+				{#each Object.entries(value) as [childKey, childValue]}
+					<br />{childKey}: {childValue}
+				{/each}
+			</code>
+		{/each}
 	</div>
+	<Button color="blue" on_click={get}>check rate limit</Button>
 </div>
 
 <style>
@@ -49,7 +45,18 @@
 		flex: 1;
 	}
 
-	li {
-		list-style: none;
+	div.flex-container {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-around;
+	}
+
+	code.flex-item {
+		box-sizing: border-box;
+		margin: 8px 2px;
+		flex: 1;
+		flex-grow: 0;
+		white-space: nowrap;
+		text-align: left;
 	}
 </style>

@@ -52,11 +52,11 @@
 	</div>
 
 	<div class="container">
-		<HelloGo />
+		<RateLimit />
 	</div>
 
 	<div class="container">
-		<RateLimit />
+		<HelloGo />
 	</div>
 </section>
 
