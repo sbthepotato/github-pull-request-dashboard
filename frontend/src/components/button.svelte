@@ -12,7 +12,7 @@
 			const url_prefix = import.meta.env.VITE_URL_PATH;
 			const params = $page.url.searchParams.toString();
 			if (url_prefix !== undefined) {
-				to = url_prefix+to
+				to = url_prefix + to;
 			}
 			goto(params ? `${to}?${params}` : to);
 		} else {
@@ -46,6 +46,10 @@
 
 	button.blue {
 		background-color: var(--border-blue);
+	}
+
+	button.red {
+		background-color: var(--red);
 	}
 
 	button:hover {

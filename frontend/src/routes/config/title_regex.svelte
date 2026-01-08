@@ -69,9 +69,6 @@
 				"api/config/delete_regex?titleRegexId=" + TitleRegexId,
 				{
 					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
 				},
 			);
 
@@ -125,10 +122,11 @@
 							<input type="text" bind:value={entry.repository_name} />
 						</td>
 						<td>
-							<button
+							<Button
 								color="red"
-								on_click={() => deleteTitleRegex(entry.title_regex_id)}
-								>delete</button>
+								on_click={() => deleteTitleRegex(entry.title_regex_id)}>
+								delete
+							</Button>
 						</td>
 					</tr>
 				{/each}

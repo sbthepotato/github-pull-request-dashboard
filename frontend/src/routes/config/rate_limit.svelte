@@ -28,7 +28,13 @@
 
 	<div class="flex-container">
 		{#each Object.entries(answer) as [key, value]}
-			<code class="flex-item" class:used={answer.used > 0}>
+			<code
+				class="flex-item"
+				class:good={value.used > 0 && value.used / value.limit < 0.55}
+				class:ok={value.used > 0 &&
+					value.used / value.limit >= 0.55 &&
+					value.used / value.limit <= 0.9}
+				class:bad={value.used > 0 && value.used / value.limit > 0.9}>
 				<strong>{key}</strong>
 
 				{#each Object.entries(value) as [childKey, childValue]}
@@ -58,5 +64,17 @@
 		flex-grow: 0;
 		white-space: nowrap;
 		text-align: left;
+	}
+
+	code.good {
+		color: var(--green);
+	}
+
+	code.ok {
+		color: var(--yellow);
+	}
+
+	code.bad {
+		color: var(--red);
 	}
 </style>
