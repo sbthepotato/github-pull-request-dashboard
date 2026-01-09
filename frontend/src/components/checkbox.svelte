@@ -3,7 +3,6 @@
 	export let id = "";
 	export let name = "";
 	export let disabled = false;
-	export let show_checkbox = true;
 
 	function handleChange(event) {
 		checked = event.target.checked;
@@ -22,16 +21,11 @@
 		{name}
 		{disabled}
 		bind:checked
-		on:change={handleChange}
-		class:hidden={!show_checkbox} />
+		on:change={handleChange} />
 	<slot></slot>
 </label>
 
 <style>
-	input[type="checkbox"].hidden {
-		opacity: 0;
-	}
-
 	label {
 		cursor: pointer;
 	}

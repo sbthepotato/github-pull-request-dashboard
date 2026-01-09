@@ -10,10 +10,10 @@
 	let loading = false;
 
 	onMount(() => {
-		getRepos(false);
+		get(false);
 	});
 
-	async function getRepos(refresh) {
+	async function get(refresh) {
 		try {
 			loading = true;
 			repos = [];
@@ -39,7 +39,7 @@
 		}
 	}
 
-	async function setRepos() {
+	async function set() {
 		const data = repos.map((repo) => ({
 			name: repo.name,
 			enabled: repo.enabled,
@@ -83,7 +83,6 @@
 							<Checkbox
 								id={repo.name}
 								name={repo.name}
-								show_checkbox={false}
 								disabled={repo.archived}
 								bind:checked={repo.enabled}>
 								{repo.name}
@@ -96,10 +95,10 @@
 			<p>{repos.length} repositories found</p>
 		{/if}
 
-		<Button color="blue" on_click={() => getRepos(true)}>
+		<Button color="blue" on_click={() => get(true)}>
 			Sync repositories with GitHub
 		</Button>
-		<Button color="green" on_click={() => setRepos()}>Save Repositories</Button>
+		<Button color="green" on_click={() => set()}>Save Repositories</Button>
 
 		{#if setResult !== ""}
 			<p>
@@ -115,34 +114,27 @@
 	}
 
 	ul {
+		margin: auto;
+		padding: 0;
 		list-style: none;
-		columns: 3;
-	}
-
-	li:first-child {
-		margin-top: 0;
-	}
-
-	li:last-child {
-		margin-bottom: 0;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-around;
 	}
 
 	li {
-		padding: 12px;
-		margin: 12px;
-		outline: 1px solid var(--text-alt);
+		margin: 8px;
 		border-radius: 8px;
 		cursor: pointer;
+		min-width: 330px;
+		white-space: nowrap;
 	}
 
 	li.enabled {
-		background-color: var(--blue-bg);
-		outline: 1px solid var(--border-blue);
 		font-weight: bold;
 	}
 
 	li.archived {
-		outline: 1px solid var(--yellow);
 		color: var(--yellow);
 		opacity: 50%;
 		cursor: not-allowed;

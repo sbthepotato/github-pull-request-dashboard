@@ -9,10 +9,9 @@ import (
 )
 
 type TitleRegex struct {
-	TitleRegexId   *int    `json:"title_regex_id,omitempty"`
-	RegexPattern   *string `json:"regex_pattern,omitempty"`
-	Link           *string `json:"link,omitempty"`
-	RepositoryName *string `json:"repository_name,omitempty"`
+	TitleRegexId *int    `json:"title_regex_id,omitempty"`
+	RegexPattern *string `json:"regex_pattern,omitempty"`
+	Link         *string `json:"link,omitempty"`
 }
 
 /**** private ****/
@@ -56,7 +55,6 @@ func (titleRegex *TitleRegex) init() {
 	titleRegex.TitleRegexId = new(int)
 	titleRegex.RegexPattern = new(string)
 	titleRegex.Link = new(string)
-	titleRegex.RepositoryName = new(string)
 }
 
 /**** public ****/
@@ -71,17 +69,14 @@ func UpsertTitleRegex(ctx context.Context, db *sql.DB, titleRegexes []*TitleRege
 		`insert into title_regex (
 			title_regex_id,
 			regex_pattern,
-			link,
-			repository_name
+			link
 		) values (
-			?,
 			?,
 			?,
 			?
 		) on conflict (title_regex_id) do update set
 			regex_pattern = excluded.regex_pattern,
-			link = excluded.link,
-			repository_name = excluded.repository_name`)
+			link = excluded.link`)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -101,7 +96,7 @@ func UpsertTitleRegex(ctx context.Context, db *sql.DB, titleRegexes []*TitleRege
 				titleRegex.TitleRegexId,
 				titleRegex.RegexPattern,
 				titleRegex.Link,
-				titleRegex.RepositoryName)
+			)
 			if err != nil {
 				tx.Rollback()
 				return err
@@ -118,8 +113,7 @@ func GetTitleRegexList(ctx context.Context, db *sql.DB) ([]*TitleRegex, error) {
 		`select
 			title_regex_id,
 			regex_pattern,
-			link,
-			repository_name
+			link
 		from title_regex
 		order by title_regex_id asc`,
 	)
@@ -138,7 +132,6 @@ func GetTitleRegexList(ctx context.Context, db *sql.DB) ([]*TitleRegex, error) {
 			titleRegex.TitleRegexId,
 			titleRegex.RegexPattern,
 			titleRegex.Link,
-			titleRegex.RepositoryName,
 		)
 		if err != nil {
 			return nil, err

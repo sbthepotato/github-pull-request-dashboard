@@ -11,8 +11,6 @@ import (
 	"strconv"
 )
 
-var cachedRegexJson []byte
-
 func GetTitleRegexList(ctx context.Context, db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
@@ -20,21 +18,19 @@ func GetTitleRegexList(ctx context.Context, db *sql.DB) http.HandlerFunc {
 
 		setHeaders(&w, "json")
 
-		if cachedRegexJson == nil {
-			cachedRegexList, err := db_pkg.GetTitleRegexList(ctx, db)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			cachedRegexJson, err = json.Marshal(cachedRegexList)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+		list, err := db_pkg.GetTitleRegexList(ctx, db)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
-		w.Write(cachedRegexJson)
+		json, err := json.Marshal(list)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(json)
 
 	}
 }
@@ -68,18 +64,6 @@ func SetTitleRegex(ctx context.Context, db *sql.DB) http.HandlerFunc {
 		}
 
 		err = db_pkg.UpsertTitleRegex(ctx, db, titleRegexList)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		cachedRegexList, err := db_pkg.GetTitleRegexList(ctx, db)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		cachedRegexJson, err = json.Marshal(cachedRegexList)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

@@ -66,7 +66,15 @@ func CreateRepositories(ctx context.Context, db *sql.DB, repositories []*Reposit
 		return err
 	}
 
-	newRepositoryNames := make([]string, 0)
+	oldRepositories, err := GetRepositories(ctx, db, false)
+	if err != nil {
+		return err
+	}
+
+	oldRepositoryNames := make([]string, len(oldRepositories))
+	for _, repository := range oldRepositories {
+		oldRepositoryNames = append(oldRepositoryNames, *repository.Name)
+	}
 
 	query, err := tx.PrepareContext(
 		ctx,
@@ -80,8 +88,8 @@ func CreateRepositories(ctx context.Context, db *sql.DB, repositories []*Reposit
 			?,
 			?,
 			?,
-			?,
-			?
+			coalesce(?, 0),
+			coalesce(?, 0)
 		) on conflict (name) do update set
 				default_branch = excluded.default_branch,
 				html_url = excluded.html_url,
@@ -96,6 +104,7 @@ func CreateRepositories(ctx context.Context, db *sql.DB, repositories []*Reposit
 	}
 	defer query.Close()
 
+	newRepositoryNames := make([]string, len(repositories))
 	for _, repository := range repositories {
 
 		newRepositoryNames = append(newRepositoryNames, *repository.Name)
@@ -107,19 +116,7 @@ func CreateRepositories(ctx context.Context, db *sql.DB, repositories []*Reposit
 		}
 	}
 
-	allRepositories, err := GetRepositories(ctx, db, false)
-	if err != nil {
-		return err
-	}
-
-	repositoryNames := make([]string, 0)
-	for _, repository := range allRepositories {
-		repositoryNames = append(repositoryNames, *repository.Name)
-	}
-
-	deletedRepositores := findExtraElements(repositoryNames, newRepositoryNames)
-
-	for _, repository := range deletedRepositores {
+	for _, repository := range findExtraElements(newRepositoryNames, oldRepositoryNames) {
 		_, err = tx.QueryContext(ctx,
 			`delete from repository where name = ?`,
 			repository)

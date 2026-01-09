@@ -2,26 +2,28 @@
 	import { onMount } from "svelte";
 	import Button from "../../components/button.svelte";
 
-	let titleRegexList = [];
+	let temp_id = -100;
+	let resultList = [];
+	let result = "";
 	let err = "";
 	let loading = false;
-	let result = "";
 
 	onMount(() => {
-		getTitles();
+		get();
 	});
 
-	async function getTitles() {
+	async function get() {
 		try {
-			titleRegexList = {};
+			resultList = {};
 			err = "";
 
 			const response = await fetch("api/config/get_title_regex_list");
 
 			if (response.ok) {
-				titleRegexList = await response.json();
+				resultList = await response.json();
 
-				titleRegexList.push({
+				resultList.push({
+					title_regex_id: temp_id,
 					regex_pattern: "",
 					link: "",
 					repository_name: "",
@@ -34,8 +36,8 @@
 		}
 	}
 
-	async function setTitleRegex() {
-		const data = titleRegexList.map((titleRegex, index) => ({
+	async function set() {
+		const data = resultList.map((titleRegex, index) => ({
 			title_regex_id: index,
 			regex_pattern: titleRegex.regex_pattern,
 			link: titleRegex.link,
@@ -60,21 +62,42 @@
 		}
 	}
 
-	async function deleteTitleRegex(TitleRegexId) {
+	async function del(id, idx) {
 		try {
 			err = "";
 			result = "";
 
-			const response = await fetch(
-				"api/config/delete_regex?titleRegexId=" + TitleRegexId,
-				{
-					method: "POST",
-				},
-			);
-
-			result = await response.text();
+			if (id > 0) {
+				const response = await fetch(
+					"api/config/delete_regex?titleRegexId=" + id,
+					{
+						method: "POST",
+					},
+				);
+				result = await response.text();
+			}
+			resultList.splice(idx, 1);
+			resultList = resultList;
 		} catch (error) {
 			err = error.message;
+		}
+	}
+
+	function handle_change(id, idx) {
+		let entry = resultList[idx];
+
+		if (
+			entry.regex_pattern != "" &&
+			entry.link != "" &&
+			resultList[resultList.length - 1].title_regex_id === entry.title_regex_id
+		) {
+			temp_id--;
+			resultList.push({
+				title_regex_id: temp_id,
+				regex_pattern: "",
+				link: "",
+				repository_name: "",
+			});
 		}
 	}
 </script>
@@ -89,12 +112,12 @@
 		to <code>https://example.com/123</code>
 	</p>
 	{#if err !== ""}
-		<p>
+		<p class="bad">
 			{err}
 		</p>
 	{:else if loading}
 		<Loading size="64px">Loading title regex list...</Loading>
-	{:else if titleRegexList !== null}
+	{:else if resultList !== null}
 		<table>
 			<thead>
 				<tr>
@@ -104,19 +127,23 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each titleRegexList as entry}
+				{#each resultList as entry, idx}
 					<tr>
 						<td>
 							<input
 								type="text"
 								placeholder="[Aa][Bb]#(\d+)"
-								bind:value={entry.regex_pattern} />
+								bind:value={entry.regex_pattern}
+								on:change={() => handle_change(entry.title_regex_id, idx)}
+								on:input={() => handle_change(entry.title_regex_id, idx)} />
 						</td>
 						<td>
 							<input
 								type="text"
 								placeholder="example.com/"
-								bind:value={entry.link} />
+								bind:value={entry.link}
+								on:change={() => handle_change(entry.title_regex_id, idx)}
+								on:input={() => handle_change(entry.title_regex_id, idx)} />
 						</td>
 						<td>
 							<input type="text" bind:value={entry.repository_name} />
@@ -124,7 +151,8 @@
 						<td>
 							<Button
 								color="red"
-								on_click={() => deleteTitleRegex(entry.title_regex_id)}>
+								on:click={(event) => remove(entry)}
+								on_click={() => del(entry.title_regex_id, idx)}>
 								delete
 							</Button>
 						</td>
@@ -133,12 +161,12 @@
 			</tbody>
 		</table>
 		{#if result !== ""}
-			<p>
+			<p class="good">
 				{result}
 			</p>
 		{/if}
 		<div>
-			<Button color="green" on_click={() => setTitleRegex()}>Save</Button>
+			<Button color="green" on_click={() => set()}>Save</Button>
 		</div>
 	{/if}
 </div>
@@ -146,5 +174,13 @@
 <style>
 	div.container {
 		flex: 1;
+	}
+
+	.good {
+		color: var(--green);
+	}
+
+	.bad {
+		color: var(--red);
 	}
 </style>
