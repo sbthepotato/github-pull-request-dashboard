@@ -79,15 +79,13 @@
 			<ul>
 				{#each repos as repo}
 					<li class:enabled={repo.enabled} class:archived={repo.archived}>
-						<label for={repo.name} class="list-item">
-							<Checkbox
-								id={repo.name}
-								name={repo.name}
-								disabled={repo.archived}
-								bind:checked={repo.enabled}>
-								{repo.name}
-							</Checkbox>
-						</label>
+						<Checkbox
+							id={repo.name}
+							name={repo.name}
+							disabled={repo.archived}
+							bind:checked={repo.enabled}>
+							{repo.name}
+						</Checkbox>
 					</li>
 				{/each}
 			</ul>
@@ -128,6 +126,9 @@
 		cursor: pointer;
 		min-width: 330px;
 		white-space: nowrap;
+		display: flex;
+		align-items: center;
+		cursor: inherit;
 	}
 
 	li.enabled {
@@ -138,11 +139,5 @@
 		color: var(--yellow);
 		opacity: 50%;
 		cursor: not-allowed;
-	}
-
-	label.list-item {
-		display: flex;
-		align-items: center;
-		cursor: inherit;
 	}
 </style>

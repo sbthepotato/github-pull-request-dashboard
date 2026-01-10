@@ -83,7 +83,7 @@
 		}
 	}
 
-	function handle_change(id, idx) {
+	function handle_change(idx) {
 		let entry = resultList[idx];
 
 		if (
@@ -134,16 +134,16 @@
 								type="text"
 								placeholder="[Aa][Bb]#(\d+)"
 								bind:value={entry.regex_pattern}
-								on:change={() => handle_change(entry.title_regex_id, idx)}
-								on:input={() => handle_change(entry.title_regex_id, idx)} />
+								on:change={() => handle_change(idx)}
+								on:input={() => handle_change(idx)} />
 						</td>
 						<td>
 							<input
 								type="text"
 								placeholder="example.com/"
 								bind:value={entry.link}
-								on:change={() => handle_change(entry.title_regex_id, idx)}
-								on:input={() => handle_change(entry.title_regex_id, idx)} />
+								on:change={() => handle_change(idx)}
+								on:input={() => handle_change(idx)} />
 						</td>
 						<td>
 							<input type="text" bind:value={entry.repository_name} />
@@ -151,7 +151,7 @@
 						<td>
 							<Button
 								color="red"
-								on:click={(event) => remove(entry)}
+								on:click={() => remove(entry)}
 								on_click={() => del(entry.title_regex_id, idx)}>
 								delete
 							</Button>

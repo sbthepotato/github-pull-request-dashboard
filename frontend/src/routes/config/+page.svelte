@@ -9,6 +9,7 @@
 	import MemberConfig from "./member_config.svelte";
 	import RepositorySelect from "../../components/repositorySelect.svelte";
 	import RateLimit from "./rate_limit.svelte";
+	import ClientConfig from "./client_config.svelte";
 
 	let repository = "";
 
@@ -16,7 +17,10 @@
 		repository = $page.url.searchParams.get("repo");
 	}
 
-	$: $page.url.search, handleParams();
+	$effect(() => {
+		$page.url.search;
+		handleParams();
+	});
 </script>
 
 <Button to="/">Back to home</Button>
@@ -27,6 +31,7 @@
 		Configure settings that will be saved in cookies and only apply to the
 		current client
 	</p>
+	<ClientConfig></ClientConfig>
 </section>
 
 <section>

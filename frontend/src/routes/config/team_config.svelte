@@ -11,10 +11,10 @@
 	let loading = false;
 
 	onMount(() => {
-		getTeams(false, repository);
+		get(false, repository);
 	});
 
-	async function getTeams(refresh, repository) {
+	async function get(refresh, repository) {
 		try {
 			loading = true;
 			teams = [];
@@ -39,7 +39,7 @@
 		}
 	}
 
-	async function setTeams() {
+	async function set() {
 		const data = teams.map((team) => ({
 			slug: team.slug,
 			name: team.name,
@@ -65,7 +65,7 @@
 		}
 	}
 
-	$: repository, getTeams(false, repository);
+	$: repository, get(false, repository);
 </script>
 
 <div class="container">
@@ -112,10 +112,10 @@
 	{/if}
 
 	<div class="button-container">
-		<Button color="blue" on_click={() => getTeams(true)}>
+		<Button color="blue" on_click={() => get(true)}>
 			Sync teams with GitHub
 		</Button>
-		<Button color="green" on_click={() => setTeams()}>Save Teams</Button>
+		<Button color="green" on_click={() => set()}>Save Teams</Button>
 	</div>
 </div>
 
@@ -123,8 +123,5 @@
 	div.container {
 		margin: 8px;
 		flex: 1;
-	}
-
-	div.button-container {
 	}
 </style>

@@ -40,6 +40,7 @@
 
 		user_filter = $page.url.searchParams.get("user");
 
+		// todo update this to use cookies
 		auto_reload = stringToBool(
 			$page.url.searchParams.get("auto_reload"),
 			false,
@@ -221,12 +222,10 @@
 		setUrlParam("show_search");
 	}
 	$: if (auto_reload) {
-		setUrlParam("auto_reload", "y");
 		reload_interval = setInterval(function () {
 			getPullRequests(false, repository);
 		}, 600000);
 	} else {
-		setUrlParam("auto_reload");
 		clearInterval(reload_interval);
 	}
 </script>
@@ -294,7 +293,6 @@
 		Refresh PR List
 	</Button>
 	<RepositorySelect />
-	<Checkbox id="auto_reload" bind:checked={auto_reload}>Auto Refresh</Checkbox>
 	<Checkbox id="show_search" bind:checked={show_search}>Show Search</Checkbox>
 	{#if user_filter !== null || search_query !== ""}
 		<Button color="blue" on_click={() => clearFilters()}>Clear Filters</Button>
