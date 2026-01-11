@@ -1,6 +1,7 @@
 <script>
 	import { onDestroy, onMount } from "svelte";
 	import { page } from "$app/stores";
+	import { browser } from "$app/environment";
 	import {
 		setUrlParam,
 		stringToBool,
@@ -24,6 +25,8 @@
 
 	let show_search = false;
 	let auto_reload = false;
+	let tv_mode = false;
+	let total_count = false;
 	let reload_interval;
 
 	let user_filter = "";
@@ -44,11 +47,20 @@
 
 		user_filter = $page.url.searchParams.get("user");
 
-		// todo update this to use cookies
+		// todo update this to use local storage
 		auto_reload = stringToBool(
 			$page.url.searchParams.get("auto_reload"),
 			false,
 		);
+
+		if (browser) {
+			if (localStorage.getItem("tv_mode") !== null) {
+				tv_mode = true;
+			}
+			if (localStorage.getItem("total_count") !== null) {
+				total_count = true;
+			}
+		}
 
 		show_search = stringToBool(
 			$page.url.searchParams.get("show_search"),
@@ -89,7 +101,6 @@
 	}
 
 	function handleSearchbarChange(value) {
-		console.log(value);
 		search_query = value.toLowerCase();
 		getFilter();
 	}
@@ -236,7 +247,7 @@
 	$: handleSearchbarChange(search_query);
 </script>
 
-<section class="pr-table">
+<section class="pr-table" class:tv_mode>
 	{#if err !== ""}
 		{err}
 	{:else if loading}
@@ -306,5 +317,9 @@
 <style>
 	section.pr-table {
 		margin-bottom: 32px;
+	}
+
+	.tv_mode {
+		min-height: 100%;
 	}
 </style>

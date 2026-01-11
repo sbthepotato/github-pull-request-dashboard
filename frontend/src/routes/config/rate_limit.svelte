@@ -43,7 +43,7 @@
 			</code>
 		{/each}
 	</div>
-	<Button color="blue" on:click={() => get}>check rate limit</Button>
+	<Button color="blue" on:click={() => get()}>check rate limit</Button>
 </div>
 
 <style>

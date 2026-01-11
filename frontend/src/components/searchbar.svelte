@@ -1,6 +1,6 @@
 <script>
 	export let placeholder = "Search...";
-	export let value = "";
+	export let value;
 </script>
 
 <div class="search-container">

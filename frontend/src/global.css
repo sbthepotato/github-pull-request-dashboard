@@ -26,6 +26,11 @@ html {
 	text-align: center;
 	background: var(--page-bg);
 	color: var(--text);
+	height: 100%;
+}
+
+body {
+	height: 100%;
 }
 
 a {

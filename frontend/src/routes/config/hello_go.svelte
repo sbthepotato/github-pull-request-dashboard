@@ -35,7 +35,7 @@
 		{/if}
 	</p>
 
-	<Button color="blue" on:click={() => helloGo}
+	<Button color="blue" on:click={() => helloGo()}
 		>Say hello to the backend</Button>
 </div>
 

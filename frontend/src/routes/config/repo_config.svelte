@@ -81,7 +81,6 @@
 					<li class:enabled={repo.enabled} class:archived={repo.archived}>
 						<Checkbox
 							id={repo.name}
-							name={repo.name}
 							disabled={repo.archived}
 							bind:checked={repo.enabled}>
 							{repo.name}

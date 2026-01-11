@@ -4,8 +4,15 @@
 	export let disabled = false;
 </script>
 
-<input type="checkbox" {id} name={id} {disabled} bind:checked class:disabled />
-<label for={id} class:disabled>
+<label class:disabled>
+	<input
+		type="checkbox"
+		{id}
+		{disabled}
+		bind:checked
+		on:change
+		class:disabled />
+
 	<slot></slot>
 </label>
 
