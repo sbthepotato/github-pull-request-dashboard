@@ -89,3 +89,14 @@ export function getPrettyDate(date_str) {
 	const date = new Date(date_str);
 	return date.toLocaleString("en-us", date_options);
 }
+
+export function redirect(destination) {
+	const url_prefix = import.meta.env.VITE_URL_PATH;
+	const params = new URLSearchParams(window.location.search).toString();
+
+	if (url_prefix) {
+		destination = url_prefix + destination;
+	}
+
+	return goto(params ? `${destination}?${params}` : destination);
+}

@@ -1,6 +1,6 @@
 <script>
 	import { page } from "$app/stores";
-
+	import { redirect } from "$lib/index.js";
 	import Button from "../../components/button.svelte";
 	import HelloGo from "./hello_go.svelte";
 	import RepoConfig from "./repo_config.svelte";
@@ -23,7 +23,7 @@
 	});
 </script>
 
-<Button to="/">Back to home</Button>
+<Button on:click={() => redirect("/")}>Back to home</Button>
 
 <section>
 	<h2>Client Configuration</h2>

@@ -151,8 +151,7 @@
 						<td>
 							<Button
 								color="red"
-								on:click={() => remove(entry)}
-								on_click={() => del(entry.title_regex_id, idx)}>
+								on:click={() => del(entry.title_regex_id, idx)}>
 								delete
 							</Button>
 						</td>
@@ -166,7 +165,7 @@
 			</p>
 		{/if}
 		<div>
-			<Button color="green" on_click={() => set()}>Save</Button>
+			<Button color="green" on:click={() => set()}>Save</Button>
 		</div>
 	{/if}
 </div>

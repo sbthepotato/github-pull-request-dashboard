@@ -112,10 +112,10 @@
 	{/if}
 
 	<div class="button-container">
-		<Button color="blue" on_click={() => get(true)}>
+		<Button color="blue" on:click={() => get(true)}>
 			Sync teams with GitHub
 		</Button>
-		<Button color="green" on_click={() => set()}>Save Teams</Button>
+		<Button color="green" on:click={() => set()}>Save Teams</Button>
 	</div>
 </div>
 

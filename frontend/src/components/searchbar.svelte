@@ -8,7 +8,9 @@
 		type="search"
 		{placeholder}
 		class={value ? "no-rounding" : ""}
-		bind:value />
+		bind:value
+		on:change
+		on:input />
 	{#if value}
 		<button on:click={clearSearch}>X</button>
 	{/if}

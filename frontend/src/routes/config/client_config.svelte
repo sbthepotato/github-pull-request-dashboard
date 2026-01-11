@@ -1,9 +1,19 @@
 <script>
 	import Checkbox from "../../components/checkbox.svelte";
+	import { onMount } from "svelte";
 
-	function tvMode(checked) {
-		console.log(checked);
-	}
+	let tv_mode = false;
+
+	// // Load from localStorage on startup
+	// onMount(() => {
+	// 	const stored = localStorage.getItem("tv_mode");
+	// 	if (stored !== null) {
+	// 		tv_mode = stored === "true";
+	// 	}
+	// });
+
+	// // Persist whenever it changes
+	// $: localStorage.setItem("tv_mode", tv_mode);
 </script>
 
-<Checkbox on:change={() => tvMode(checked)}>TV Mode</Checkbox>
+<Checkbox bind:checked={tv_mode}>TV Mode</Checkbox>

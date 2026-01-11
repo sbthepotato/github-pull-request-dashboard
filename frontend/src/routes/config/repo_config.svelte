@@ -93,10 +93,10 @@
 			<p>{repos.length} repositories found</p>
 		{/if}
 
-		<Button color="blue" on_click={() => get(true)}>
+		<Button color="blue" on:click={() => get(true)}>
 			Sync repositories with GitHub
 		</Button>
-		<Button color="green" on_click={() => set()}>Save Repositories</Button>
+		<Button color="green" on:click={() => set()}>Save Repositories</Button>
 
 		{#if setResult !== ""}
 			<p>

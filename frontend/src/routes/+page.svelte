@@ -1,8 +1,12 @@
 <script>
 	import { onDestroy, onMount } from "svelte";
 	import { page } from "$app/stores";
-	import { setUrlParam, stringToBool, boolToString } from "$lib/index.js";
-
+	import {
+		setUrlParam,
+		stringToBool,
+		boolToString,
+		redirect,
+	} from "$lib/index.js";
 	import Button from "../components/button.svelte";
 	import Checkbox from "../components/checkbox.svelte";
 	import Searchbar from "../components/searchbar.svelte";
@@ -84,8 +88,9 @@
 		}
 	}
 
-	function handleSearchbarChange(event) {
-		search_query = event.detail.value.toLowerCase();
+	function handleSearchbarChange(value) {
+		console.log(value);
+		search_query = value.toLowerCase();
 		getFilter();
 	}
 
@@ -228,6 +233,7 @@
 	} else {
 		clearInterval(reload_interval);
 	}
+	$: handleSearchbarChange(search_query);
 </script>
 
 <section class="pr-table">
@@ -239,10 +245,8 @@
 		<PRAgg {pr_list} review_teams={result.review_teams} />
 		{#if show_search}
 			<Searchbar
-				value={search_query}
-				placeholder="Search Pull Requests..."
-				on:change={handleSearchbarChange}
-				on:input={handleSearchbarChange} />
+				bind:value={search_query}
+				placeholder="Search Pull Requests..." />
 		{/if}
 		{#if user_filter === null}
 			<PRTable {pr_list} />
@@ -288,14 +292,14 @@
 </section>
 
 <section class="buttons">
-	<Button color="grey" to="/config">Config</Button>
-	<Button color="blue" on_click={() => getPullRequests(true, repository)}>
+	<Button color="grey" on:click={() => redirect("/config")}>Config</Button>
+	<Button color="blue" on:click={() => getPullRequests(true, repository)}>
 		Refresh PR List
 	</Button>
 	<RepositorySelect />
 	<Checkbox id="show_search" bind:checked={show_search}>Show Search</Checkbox>
 	{#if user_filter !== null || search_query !== ""}
-		<Button color="blue" on_click={() => clearFilters()}>Clear Filters</Button>
+		<Button color="blue" on:click={() => clearFilters()}>Clear Filters</Button>
 	{/if}
 </section>
 

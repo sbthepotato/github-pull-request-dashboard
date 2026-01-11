@@ -1,27 +1,9 @@
 <script>
-	import { goto } from "$app/navigation";
-	import { page } from "$app/stores";
-
 	export let type = "button";
-	export let on_click = () => {};
-	export let to = null;
 	export let color = "grey";
-
-	function click_handler(event) {
-		if (to) {
-			const url_prefix = import.meta.env.VITE_URL_PATH;
-			const params = $page.url.searchParams.toString();
-			if (url_prefix !== undefined) {
-				to = url_prefix + to;
-			}
-			goto(params ? `${to}?${params}` : to);
-		} else {
-			on_click(event);
-		}
-	}
 </script>
 
-<button class={color} {type} on:click={click_handler}>
+<button class={color} {type} on:click>
 	<slot></slot>
 </button>
 
