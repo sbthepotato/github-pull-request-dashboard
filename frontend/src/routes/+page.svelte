@@ -7,6 +7,7 @@
 		stringToBool,
 		boolToString,
 		redirect,
+		getPrettyDate,
 	} from "$lib/index.js";
 	import Button from "../components/button.svelte";
 	import Checkbox from "../components/checkbox.svelte";
@@ -16,19 +17,23 @@
 	import PRTable from "./pr_table.svelte";
 	import PRAgg from "./pr_aggregation.svelte";
 
+	// variables for showing result
 	let err = "";
 	let result = {};
 	let pr_list = {};
 	let repository = "";
-
 	let loading = false;
 
+	// settings
 	let show_search = false;
-	let auto_reload = false;
 	let tv_mode = false;
 	let total_count = false;
-	let reload_interval;
+	let auto_reload = false;
+	let seamless_reload = false;
+	let last_updated = false;
 
+	// filters and other
+	let reload_interval;
 	let user_filter = "";
 	let user_filter_object = {};
 	let search_query = "";
@@ -47,18 +52,21 @@
 
 		user_filter = $page.url.searchParams.get("user");
 
-		// todo update this to use local storage
-		auto_reload = stringToBool(
-			$page.url.searchParams.get("auto_reload"),
-			false,
-		);
-
 		if (browser) {
 			if (localStorage.getItem("tv_mode") !== null) {
 				tv_mode = true;
 			}
 			if (localStorage.getItem("total_count") !== null) {
 				total_count = true;
+			}
+			if (localStorage.getItem("auto_reload") !== null) {
+				auto_reload = true;
+			}
+			if (localStorage.getItem("seamless_reload") !== null) {
+				seamless_reload = true;
+			}
+			if (localStorage.getItem("last_updated") !== null) {
+				last_updated = true;
 			}
 		}
 
@@ -74,7 +82,12 @@
 
 	async function getPullRequests(refresh, repository) {
 		try {
-			loading = true;
+			if (
+				Object.keys(result).length === 0 ||
+				(Object.keys(result).length === 0 && !seamless_reload)
+			) {
+				loading = true;
+			}
 			err = "";
 			result = {};
 			pr_list = {};
@@ -253,7 +266,9 @@
 	{:else if loading}
 		<Loading>Loading PR list...</Loading>
 	{:else}
-		<PRAgg {pr_list} review_teams={result.review_teams} />
+		<PRAgg
+			pr_list={total_count ? result.pull_requests : pr_list}
+			review_teams={result.review_teams} />
 		{#if show_search}
 			<Searchbar
 				bind:value={search_query}
@@ -299,6 +314,11 @@
 				</PRTable>
 			{/if}
 		{/if}
+		{#if last_updated}
+			<p class="last-updated">
+				Lasted updated {getPrettyDate(result.updated)}
+			</p>
+		{/if}
 	{/if}
 </section>
 
@@ -321,5 +341,10 @@
 
 	.tv_mode {
 		min-height: 100%;
+	}
+
+	.last-updated {
+		color: var(--text-alt);
+		font-size: small;
 	}
 </style>

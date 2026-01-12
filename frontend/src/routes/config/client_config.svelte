@@ -5,6 +5,9 @@
 
 	let tv_mode = false;
 	let total_count = false;
+	let auto_refresh = false;
+	let seamless_reload = false;
+	let last_updated = false;
 
 	onMount(() => {
 		if (browser) {
@@ -14,41 +17,65 @@
 			if (localStorage.getItem("total_count") !== null) {
 				total_count = true;
 			}
+			if (localStorage.getItem("auto_refresh") !== null) {
+				auto_refresh = true;
+			}
+			if (localStorage.getItem("seamless_reload") !== null) {
+				seamless_reload = true;
+			}
+			if (localStorage.getItem("last_updated") !== null) {
+				last_updated = true;
+			}
 		}
 	});
 
-	function setTVMode(value) {
-		tv_mode = value;
-
+	function handleChange(name, value) {
 		if (browser) {
-			if (tv_mode) {
-				localStorage.setItem("tv_mode", String(value));
+			if (value) {
+				localStorage.setItem(name, String(value));
 			} else {
-				localStorage.removeItem("tv_mode");
-			}
-		}
-	}
-
-	function setTotalCount(value) {
-		total_count = value;
-
-		if (browser) {
-			if (total_count) {
-				localStorage.setItem("total_count", String(value));
-			} else {
-				localStorage.removeItem("total_count");
+				localStorage.removeItem(name);
 			}
 		}
 	}
 </script>
 
 <div>
-	<Checkbox bind:checked={tv_mode} on:change={() => setTVMode(tv_mode)}>
-		Enable TV Mode (will always hide buttons out of scroll view)
-	</Checkbox>
-	<Checkbox
-		bind:checked={total_count}
-		on:change={() => setTotalCount(total_count)}>
-		Count all Pull Requests instead of only filtered
-	</Checkbox>
+	<ul>
+		<li>
+			<Checkbox
+				bind:checked={tv_mode}
+				on:change={() => handleChange("tv_mode", tv_mode)}>
+				Enable TV Mode (will always hide buttons out of scroll view)
+			</Checkbox>
+		</li>
+		<li>
+			<Checkbox
+				bind:checked={total_count}
+				on:change={() => handleChange("total_count", total_count)}>
+				Count all Pull Requests instead of only filtered
+			</Checkbox>
+		</li>
+		<li>
+			<Checkbox
+				bind:checked={auto_refresh}
+				on:change={() => handleChange("auto_refresh", auto_refresh)}>
+				Automatically refresh dashboard (every 10 minutes)
+			</Checkbox>
+		</li>
+		<li>
+			<Checkbox
+				bind:checked={seamless_reload}
+				on:change={() => handleChange("seamless_reload", seamless_reload)}>
+				Reload without showing loading animation on dashboard
+			</Checkbox>
+		</li>
+		<li>
+			<Checkbox
+				bind:checked={last_updated}
+				on:change={() => handleChange("last_updated", last_updated)}>
+				Show last updated time in bottom of dashboard
+			</Checkbox>
+		</li>
+	</ul>
 </div>

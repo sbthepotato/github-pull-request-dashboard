@@ -121,6 +121,11 @@ input:focus {
 	border: 1px solid var(--border-blue);
 }
 
+ul {
+	list-style: none;
+	text-align: left;
+}
+
 input::-webkit-search-decoration,
 input::-webkit-search-cancel-button,
 input::-webkit-search-results-button,

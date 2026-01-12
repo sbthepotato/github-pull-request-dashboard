@@ -28,10 +28,12 @@
 <section>
 	<h2>Client Configuration</h2>
 	<p>
-		Configure settings that will be saved in cookies and only apply to the
-		current client
+		Configure settings that will be saved in local storage and will only apply
+		to current client
 	</p>
-	<ClientConfig></ClientConfig>
+	<div class="container">
+		<ClientConfig />
+	</div>
 </section>
 
 <section>
@@ -39,11 +41,9 @@
 	<p>
 		Configure settings that will be saved on the server and apply for everyone
 	</p>
-	<div>
-		<RepositorySelect>Select repository to configure</RepositorySelect>
-	</div>
 
 	<div class="container">
+		<RepositorySelect>Select repository to configure</RepositorySelect>
 		<TeamConfig {repository} />
 		<MemberConfig {repository} />
 	</div>
@@ -55,6 +55,10 @@
 	<div class="container">
 		<TitleRegexConfig />
 	</div>
+</section>
+
+<section>
+	<h2>Debug</h2>
 
 	<div class="container">
 		<RateLimit />
@@ -72,9 +76,19 @@
 </footer>
 
 <style>
+	section {
+		background-color: var(--content-bg-alt);
+		border-radius: 16px 16px;
+		padding: 16px 8px;
+		margin: 16px;
+	}
+
 	div.container {
 		display: flex;
 		margin: 8px 4px 48px;
+		padding: 16px 8px;
+		outline: 1px solid var(--border);
+		border-radius: 16px 16px;
 	}
 
 	footer {

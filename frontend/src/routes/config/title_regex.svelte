@@ -182,4 +182,10 @@
 	.bad {
 		color: var(--red);
 	}
+
+	input {
+		background-color: var(--blue-bg);
+		outline: 1px solid var(--border);
+		border-radius: 4px;
+	}
 </style>

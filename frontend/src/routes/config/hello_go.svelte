@@ -27,10 +27,8 @@
 
 	<p>
 		{#if err}
-			<br />
 			<span class="bad">{err}</span>
 		{:else if answer}
-			<br />
 			<span class="good">{answer}</span>
 		{/if}
 	</p>
