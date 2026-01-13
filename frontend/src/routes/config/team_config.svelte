@@ -87,7 +87,7 @@
 			</thead>
 			<tbody>
 				{#each teams as team}
-					<tr>
+					<tr class:enabled={team.review_order > 0}>
 						<td>
 							{team.name}
 						</td>
@@ -123,5 +123,9 @@
 	div.container {
 		margin: 8px;
 		flex: 1;
+	}
+
+	.enabled {
+		font-weight: bold;
 	}
 </style>

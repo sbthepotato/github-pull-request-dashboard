@@ -12,6 +12,8 @@ import (
 )
 
 var mu sync.Mutex
+var lastRateLimit time.Time
+var cachedRateLimits *github.RateLimits
 
 func setHeaders(w *http.ResponseWriter, content_type string) {
 
@@ -60,13 +62,21 @@ func GetRateLimit(ctx context.Context, c *github.Client) http.HandlerFunc {
 		mu.Lock()
 		defer mu.Unlock()
 
-		rateLimit, err := github_pkg.GetApiLimit(ctx, c)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		currentTime := time.Now()
+
+		if cachedRateLimits == nil ||
+			currentTime.Sub(lastRateLimit).Minutes() > 1 {
+			lastRateLimit = time.Now()
+			rateLimit, err := github_pkg.GetApiLimit(ctx, c)
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			cachedRateLimits = rateLimit
 		}
 
-		jsonData, err := json.Marshal(rateLimit)
+		jsonData, err := json.Marshal(cachedRateLimits)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

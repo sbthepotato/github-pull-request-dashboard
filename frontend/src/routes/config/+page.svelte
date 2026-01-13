@@ -11,7 +11,7 @@
 	import RateLimit from "./rate_limit.svelte";
 	import ClientConfig from "./client_config.svelte";
 
-	let repository = "";
+	let repository = $state("repository");
 
 	function handleParams() {
 		repository = $page.url.searchParams.get("repo");

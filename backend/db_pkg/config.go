@@ -88,6 +88,7 @@ func UpsertTitleRegex(ctx context.Context, db *sql.DB, titleRegexes []*TitleRege
 
 			_, err := regexp.Compile(*titleRegex.RegexPattern)
 			if err != nil {
+				tx.Rollback()
 				return err
 			}
 

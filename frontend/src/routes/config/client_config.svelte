@@ -8,6 +8,7 @@
 	let auto_refresh = false;
 	let seamless_reload = false;
 	let last_updated = false;
+	let disable_regex = false;
 
 	onMount(() => {
 		if (browser) {
@@ -25,6 +26,9 @@
 			}
 			if (localStorage.getItem("last_updated") !== null) {
 				last_updated = true;
+			}
+			if (localStorage.getItem("disable_regex") !== null) {
+				disable_regex = true;
 			}
 		}
 	});
@@ -74,7 +78,14 @@
 			<Checkbox
 				bind:checked={last_updated}
 				on:change={() => handleChange("last_updated", last_updated)}>
-				Show last updated time in bottom of dashboard
+				Show last updated time in bottom right of dashboard
+			</Checkbox>
+		</li>
+		<li>
+			<Checkbox
+				bind:checked={disable_regex}
+				on:change={() => handleChange("disable_regex", disable_regex)}>
+				Disable regex links in titles
 			</Checkbox>
 		</li>
 	</ul>

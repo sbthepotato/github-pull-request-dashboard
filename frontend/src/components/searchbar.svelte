@@ -12,7 +12,7 @@
 		on:change
 		on:input />
 	{#if value}
-		<button on:click={clearSearch}>X</button>
+		<button on:click={() => (value = "")}>X</button>
 	{/if}
 </div>
 

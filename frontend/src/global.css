@@ -113,6 +113,7 @@ code {
 input {
 	background-color: var(--content-bg-alt);
 	color: var(--text);
+	accent-color: var(--border-blue);
 	border: none;
 }
 

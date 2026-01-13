@@ -41,7 +41,6 @@
 			title_regex_id: index,
 			regex_pattern: titleRegex.regex_pattern,
 			link: titleRegex.link,
-			repository_name: titleRegex.repository_name,
 		}));
 
 		try {
@@ -123,7 +122,6 @@
 				<tr>
 					<th>Regex Pattern</th>
 					<th>Link</th>
-					<th></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -145,9 +143,7 @@
 								on:change={() => handle_change(idx)}
 								on:input={() => handle_change(idx)} />
 						</td>
-						<td>
-							<input type="text" bind:value={entry.repository_name} />
-						</td>
+
 						<td>
 							<Button
 								color="red"

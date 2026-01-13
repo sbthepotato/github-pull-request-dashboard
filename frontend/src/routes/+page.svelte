@@ -82,10 +82,7 @@
 
 	async function getPullRequests(refresh, repository) {
 		try {
-			if (
-				Object.keys(result).length === 0 ||
-				(Object.keys(result).length === 0 && !seamless_reload)
-			) {
+			if (Object.keys(result).length === 0 || !seamless_reload) {
 				loading = true;
 			}
 			err = "";
@@ -274,6 +271,11 @@
 				bind:value={search_query}
 				placeholder="Search Pull Requests..." />
 		{/if}
+		{#if last_updated}
+			<p class="last-updated">
+				Lasted updated {getPrettyDate(result.updated)}
+			</p>
+		{/if}
 		{#if user_filter === null}
 			<PRTable {pr_list} />
 		{:else if user_filter !== null}
@@ -314,11 +316,6 @@
 				</PRTable>
 			{/if}
 		{/if}
-		{#if last_updated}
-			<p class="last-updated">
-				Lasted updated {getPrettyDate(result.updated)}
-			</p>
-		{/if}
 	{/if}
 </section>
 
@@ -346,5 +343,9 @@
 	.last-updated {
 		color: var(--text-alt);
 		font-size: small;
+		margin: 8px;
+		position: fixed;
+		bottom: 0px;
+		right: 0px;
 	}
 </style>
