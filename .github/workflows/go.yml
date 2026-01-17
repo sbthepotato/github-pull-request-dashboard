@@ -17,12 +17,13 @@ jobs:
       run:
         working-directory: ./backend
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v6.0.1
 
       - name: Set up Go
-        uses: actions/setup-go@v5.2.0
+        uses: actions/setup-go@v6.2.0
         with:
-          go-version: "1.23.5"
+          go-version: "1.25.3"
+          cache-dependency-path: backend/go.sum
 
       - name: install dependencies
         run: go get .
@@ -31,8 +32,18 @@ jobs:
         run: |
           GOOS=windows GOARCH=amd64 go build -o github-pull-request-dashboard.exe
 
+      - name: Build Mac executable
+        run: /
+          GOOS=darwin GOARCH=arm64 go build -o github-pull-request-dashboard
+
       - name: Upload artifact
-        uses: actions/upload-artifact@v4.6.0
+        uses: actions/upload-artifact@v6.0.0
         with:
           name: github-pull-request-dashboard-windows-executable
-          path: github-pull-request-dashboard.exe
+          path: backend/github-pull-request-dashboard.exe
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: github-pull-request-dashboard-mac-executable
+          path: backend/github-pull-request-dashboard
