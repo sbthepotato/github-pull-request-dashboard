@@ -16,6 +16,6 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"cookie": "^0.7.0"
+		"cookie": "^1.1.1"
 	}
 }
