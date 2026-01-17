@@ -9,7 +9,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/google/go-github/v80/github"
+	"github.com/google/go-github/v81/github"
 )
 
 func GetDefaultRepository(ctx context.Context, repository string) http.HandlerFunc {

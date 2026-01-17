@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/google/go-github/v80/github"
+	"github.com/google/go-github/v81/github"
 	_ "modernc.org/sqlite"
 )
 
