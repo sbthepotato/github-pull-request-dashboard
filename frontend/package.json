@@ -14,5 +14,8 @@
 		"svelte": "^5",
 		"vite": "^7.1.4"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"cookie": "^0.7.0"
+	}
 }
