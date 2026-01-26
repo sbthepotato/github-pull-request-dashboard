@@ -1,20 +1,6 @@
 <script>
-	import { createEventDispatcher } from "svelte";
-
 	export let placeholder = "Search...";
-	export let value = "";
-
-	const dispatch = createEventDispatcher();
-
-	function handle_change(event) {
-		value = event.target.value;
-		dispatch("change", { value });
-	}
-
-	function clear_search() {
-		value = "";
-		dispatch("change", { value });
-	}
+	export let value;
 </script>
 
 <div class="search-container">
@@ -23,10 +9,10 @@
 		{placeholder}
 		class={value ? "no-rounding" : ""}
 		bind:value
-		on:change={handle_change}
-		on:input={handle_change} />
+		on:change
+		on:input />
 	{#if value}
-		<button on:click={clear_search}>X</button>
+		<button on:click={() => (value = "")}>X</button>
 	{/if}
 </div>
 

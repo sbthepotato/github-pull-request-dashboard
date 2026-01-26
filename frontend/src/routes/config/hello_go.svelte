@@ -27,15 +27,15 @@
 
 	<p>
 		{#if err}
-			<br />
 			<span class="bad">{err}</span>
 		{:else if answer}
-			<br />
 			<span class="good">{answer}</span>
 		{/if}
 	</p>
 
-	<Button color="blue" on_click={helloGo}>Say hello to the backend</Button>
+	<Button color="blue" on:click={() => helloGo()}>
+		Say hello to the backend
+	</Button>
 </div>
 
 <style>

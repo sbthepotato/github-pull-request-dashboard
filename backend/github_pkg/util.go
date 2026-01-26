@@ -26,3 +26,12 @@ func InitGithubConnection(ctx context.Context) (*github.Client, string, string, 
 	return client, os.Getenv("owner"), os.Getenv("repo"), nil
 
 }
+
+func GetApiLimit(ctx context.Context, c *github.Client) (*github.RateLimits, error) {
+	rateLimits, _, err := c.RateLimit.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return rateLimits, nil
+}

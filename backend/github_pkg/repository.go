@@ -44,7 +44,15 @@ func GetRepositories(ctx context.Context, db *sql.DB, c *github.Client, owner st
 		repositories = append(repositories, repository)
 	}
 
-	db_pkg.CreateRepositories(ctx, db, repositories)
+	err := db_pkg.CreateRepositories(ctx, db, repositories)
+	if err != nil {
+		return nil, err
+	}
+
+	repositories, err = db_pkg.GetRepositories(ctx, db, false)
+	if err != nil {
+		return nil, err
+	}
 
 	return repositories, nil
 }

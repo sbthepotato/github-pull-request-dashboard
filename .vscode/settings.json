@@ -1,11 +1,11 @@
 {
 	"editor.insertSpaces": false,
-	"editor.defaultFormatter": "prettier.prettier-vscode",
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.formatOnSave": true,
 	"[go]": {
 		"editor.defaultFormatter": "golang.go"
 	},
 	"[svelte]": {
-		"editor.defaultFormatter": "svelte.svelte-vscode"
-	},
-	"editor.formatOnSave": true
+		"editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+	}
 }

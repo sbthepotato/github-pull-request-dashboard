@@ -29,12 +29,10 @@ jobs:
         run: go get .
 
       - name: Build Windows executable
-        run: |
-          GOOS=windows GOARCH=amd64 go build -o github-pull-request-dashboard.exe
+        run: GOOS=windows GOARCH=amd64 go build -o github-pull-request-dashboard.exe
 
       - name: Build Mac executable
-        run: /
-          GOOS=darwin GOARCH=arm64 go build -o github-pull-request-dashboard
+        run: GOOS=darwin GOARCH=arm64 go build -o github-pull-request-dashboard
 
       - name: Upload artifact
         uses: actions/upload-artifact@v6.0.0

@@ -1,6 +1,7 @@
 <script>
+	import { onMount } from "svelte";
+	import { browser } from "$app/environment";
 	import { getTextLuminance, getPrettyDate } from "$lib/index.js";
-
 	import Review from "../components/review.svelte";
 	import PrAwaiting from "../components/pr_awaiting.svelte";
 	import User from "../components/user.svelte";
@@ -9,7 +10,16 @@
 	export let pr_list = [];
 	export let show_empty = true;
 
+	let disable_regex = false;
 	let size = "12px";
+
+	onMount(() => {
+		if (browser) {
+			if (localStorage.getItem("disable_regex") !== null) {
+				disable_regex = true;
+			}
+		}
+	});
 </script>
 
 {#if show_empty || (pr_list != undefined && pr_list.length > 0)}
@@ -29,7 +39,9 @@
 							</td>
 
 							<td class="title">
-								<span class="pr-title">{@html pr.html_title}</span>
+								<span class="pr-title">
+									{@html disable_regex ? pr.title : (pr.html_title ?? pr.title)}
+								</span>
 								{#if pr.labels != undefined}
 									<span class="tags">
 										{#each pr.labels as label}

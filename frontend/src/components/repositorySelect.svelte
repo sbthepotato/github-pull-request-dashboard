@@ -81,4 +81,18 @@
 	div.container {
 		display: inline-block;
 	}
+
+	select {
+		background-color: var(--content-bg-alt);
+		color: var(--text);
+		padding: 8px;
+		border-radius: 8px;
+		border: 1px solid var(--border);
+	}
+
+	select:hover,
+	select:focus {
+		cursor: pointer;
+	}
+
 </style>

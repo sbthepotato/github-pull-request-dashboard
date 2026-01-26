@@ -25,6 +25,7 @@ func initRepositoryTable(ctx context.Context, db *sql.DB) error {
 			name text primary key not null,
 			default_branch text not null,
 			html_url text not null,
+			archived integer not null,
 			enabled integer not null
 		)`,
 	)
@@ -50,8 +51,8 @@ func (repository *Repository) init() {
 	repository.Name = new(string)
 	repository.DefaultBranch = new(string)
 	repository.HTMLURL = new(string)
+	repository.Archived = new(bool)
 	repository.Enabled = new(bool)
-
 }
 
 /**** public ****/
@@ -65,27 +66,60 @@ func CreateRepositories(ctx context.Context, db *sql.DB, repositories []*Reposit
 		return err
 	}
 
+	oldRepositories, err := GetRepositories(ctx, db, false)
+	if err != nil {
+		return err
+	}
+
+	oldRepositoryNames := make([]string, len(oldRepositories))
+	for _, repository := range oldRepositories {
+		oldRepositoryNames = append(oldRepositoryNames, *repository.Name)
+	}
+
 	query, err := tx.PrepareContext(
 		ctx,
-		`insert or ignore into repository (
-			name, 
-			default_branch, 
-			html_url, 
-			enabled 
-			) values (
+		`insert into repository (
+			name,
+			default_branch,
+			html_url,
+			archived,
+			enabled
+		) values (
 			?,
 			?,
 			?,
-			?)`)
+			coalesce(?, 0),
+			coalesce(?, 0)
+		) on conflict (name) do update set
+				default_branch = excluded.default_branch,
+				html_url = excluded.html_url,
+				archived = excluded.archived,
+				enabled = case
+										when excluded.archived = 1 then 0
+										else enabled 
+										end`)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 	defer query.Close()
 
+	newRepositoryNames := make([]string, len(repositories))
 	for _, repository := range repositories {
 
-		_, err := query.ExecContext(ctx, repository.Name, repository.DefaultBranch, repository.HTMLURL, repository.Enabled)
+		newRepositoryNames = append(newRepositoryNames, *repository.Name)
+
+		_, err := query.ExecContext(ctx, repository.Name, repository.DefaultBranch, repository.HTMLURL, repository.Archived, repository.Enabled)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	for _, repository := range findExtraElements(newRepositoryNames, oldRepositoryNames) {
+		_, err = tx.QueryContext(ctx,
+			`delete from repository where name = ?`,
+			repository)
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -138,6 +172,7 @@ func GetRepositories(ctx context.Context, db *sql.DB, activeOnly bool) ([]*Repos
 			name,
 			default_branch,
 			html_url,
+			archived,
 			enabled
 		from repository
 		where enabled = ?
@@ -162,6 +197,7 @@ func GetRepositories(ctx context.Context, db *sql.DB, activeOnly bool) ([]*Repos
 			repository.Name,
 			repository.DefaultBranch,
 			repository.HTMLURL,
+			repository.Archived,
 			repository.Enabled,
 		)
 		if err != nil {
