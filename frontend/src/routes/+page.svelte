@@ -273,7 +273,7 @@
 		{/if}
 		{#if last_updated}
 			<p class="last-updated">
-				Lasted updated {getPrettyDate(result.updated)}
+				Lasted updated {getPrettyDate(result.updated, true)}
 			</p>
 		{/if}
 		{#if user_filter === null}
@@ -341,9 +341,13 @@
 	}
 
 	.last-updated {
+		z-index: 1;
 		color: var(--text-alt);
+		background-color: var(--content-bg-alt);
+		border-radius: 8px 0 0 0;
 		font-size: small;
-		margin: 8px;
+		padding: 8px;
+		margin: 0;
 		position: fixed;
 		bottom: 0px;
 		right: 0px;

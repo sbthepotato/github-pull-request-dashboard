@@ -43,7 +43,9 @@
 	</p>
 
 	<div class="container">
+		<div class="row">
 		<RepositorySelect>Select repository to configure</RepositorySelect>
+		</div>
 		<TeamConfig {repository} />
 		<MemberConfig {repository} />
 	</div>
@@ -89,6 +91,11 @@
 		padding: 16px 8px;
 		outline: 1px solid var(--border);
 		border-radius: 16px 16px;
+		flex-wrap: wrap;
+	}
+
+	.row {
+		flex: 0 0 100%;
 	}
 
 	footer {

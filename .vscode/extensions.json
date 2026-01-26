@@ -1,7 +1,8 @@
 {
 	"recommendations": [
-		"prettier.prettier-vscode",
+		"esbenp.prettier-vscode",
 		"golang.go",
-		"svelte.svelte-vscode"
+		"svelte.svelte-vscode",
+		"rvest.vs-code-prettier-eslint",
 	]
 }
