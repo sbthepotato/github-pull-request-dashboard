@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"regexp"
+	"strings"
 
 	_ "modernc.org/sqlite"
 )
@@ -90,6 +91,11 @@ func UpsertTitleRegex(ctx context.Context, db *sql.DB, titleRegexes []*TitleRege
 			if err != nil {
 				tx.Rollback()
 				return err
+			}
+
+			if !strings.HasPrefix(*titleRegex.Link, "https://") {
+				newLink := "https://" + *titleRegex.Link
+				titleRegex.Link = &newLink
 			}
 
 			_, err = query.ExecContext(

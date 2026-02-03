@@ -37,6 +37,7 @@
 	let user_filter = "";
 	let user_filter_object = {};
 	let search_query = "";
+	let updated_time;
 
 	onMount(() => {
 		repository = $page.url.searchParams.get("repo");
@@ -100,6 +101,7 @@
 				result = await response.json();
 
 				pr_list = result.pull_requests;
+				updated_time = result.updated;
 			} else {
 				throw new Error(await response.text());
 			}
@@ -130,6 +132,8 @@
 			newRepository !== repository
 		) {
 			repository = newRepository;
+			result = {}
+			updated_time = null
 			getPullRequests(false, repository);
 		}
 	}
@@ -271,9 +275,9 @@
 				bind:value={search_query}
 				placeholder="Search Pull Requests..." />
 		{/if}
-		{#if last_updated}
+		{#if last_updated && updated_time}
 			<p class="last-updated">
-				Lasted updated {getPrettyDate(result.updated, true)}
+				Lasted updated {getPrettyDate(updated_time, true)}
 			</p>
 		{/if}
 		{#if user_filter === null}

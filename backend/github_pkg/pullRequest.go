@@ -231,7 +231,7 @@ func processPullRequest(prChannel chan<- *db_pkg.PullRequest,
 			log.Println(errorMessage, err.Error())
 		}
 
-		result := re.ReplaceAllString(*resultPr.HtmlTitle, `<a href="`+*item.Link+`${1}" target="_blank">${0}</a>`)
+		result := re.ReplaceAllString(*resultPr.HtmlTitle, `<a href="`+*item.Link+`" target="_blank">${0}</a>`)
 		resultPr.HtmlTitle = &result
 	}
 
