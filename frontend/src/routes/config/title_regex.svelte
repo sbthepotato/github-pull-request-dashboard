@@ -106,7 +106,7 @@
 	<p>Enter regex patterns and a link to insert with the pattern</p>
 	<p>
 		E.G. <code>"[Aa][Bb]#(\d+)"</code> with
-		<code>"https://example.com/&lbrace;1&rbrace;/test"</code>
+		<code>"https://example.com/$&lbrace;1&rbrace;/test"</code>
 		would make a pull request title with <code>AB#123</code> in the title make AB#123 into a link
 		to <code>https://example.com/123/test</code>
 	</p>

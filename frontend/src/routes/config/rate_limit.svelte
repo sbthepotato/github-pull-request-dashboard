@@ -13,7 +13,6 @@
 
 			if (response.ok) {
 				answer = await response.json();
-				console.log(answer);
 			} else {
 				throw new Error(await response.text());
 			}

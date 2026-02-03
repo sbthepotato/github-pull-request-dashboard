@@ -10,17 +10,19 @@
 	import RepositorySelect from "../../components/repositorySelect.svelte";
 	import RateLimit from "./rate_limit.svelte";
 	import ClientConfig from "./client_config.svelte";
+	import { onMount } from "svelte";
 
-	let repository = $state("repository");
+	let repository = "";
+
+	onMount(() => {
+		repository = $page.url.searchParams.get("repo");
+	})
 
 	function handleParams() {
 		repository = $page.url.searchParams.get("repo");
 	}
 
-	$effect(() => {
-		$page.url.search;
-		handleParams();
-	});
+	$: $page.url.search, handleParams();
 </script>
 
 <Button on:click={() => redirect("/")}>Back to home</Button>
