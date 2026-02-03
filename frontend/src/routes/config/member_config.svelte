@@ -11,10 +11,10 @@
 	let loading = false;
 
 	onMount(() => {
-		getUsers(false, "members");
+		get(false, "members", repository);
 	});
 
-	async function getUsers(refresh, type) {
+	async function get(refresh, type, repository) {
 		try {
 			loading = true;
 			err = "";
@@ -40,6 +40,8 @@
 			loading = false;
 		}
 	}
+
+	$: repository, get(false, "members", repository);
 </script>
 
 <div class="container">
@@ -79,10 +81,10 @@
 	{/if}
 
 	<div class="button-container">
-		<Button color="blue" on_click={() => getUsers(true, "users")}>
+		<Button color="blue" on:click={() => get(true, "users", repository)}>
 			Sync all users with GitHub
 		</Button>
-		<Button color="blue" on_click={() => getUsers(true, "members")}>
+		<Button color="blue" on:click={() => get(true, "members", repository)}>
 			Sync repository team members with GitHub
 		</Button>
 	</div>

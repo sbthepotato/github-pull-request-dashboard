@@ -15,6 +15,15 @@ const date_options = {
 	hour12: false,
 };
 
+const date_options_detailed = {
+	month: "short",
+	day: "numeric",
+	hour: "numeric",
+	minute: "numeric",
+	second: "numeric",
+	hour12: false,
+};
+
 export function setUrlParam(param_name, param_value) {
 	if (typeof window !== "undefined") {
 		const url = new URL(window.location.href);
@@ -85,7 +94,24 @@ export function boolToString(bool) {
 	return "n";
 }
 
-export function getPrettyDate(date_str) {
+export function getPrettyDate(date_str, detailed = false) {
 	const date = new Date(date_str);
-	return date.toLocaleString("en-us", date_options);
+	let format;
+	if (detailed) {
+		format = date_options_detailed;
+	} else {
+		format = date_options;
+	}
+	return date.toLocaleString("en-us", format);
+}
+
+export function redirect(destination) {
+	const url_prefix = import.meta.env.VITE_URL_PATH;
+	const params = new URLSearchParams(window.location.search).toString();
+
+	if (url_prefix) {
+		destination = url_prefix + destination;
+	}
+
+	return goto(params ? `${destination}?${params}` : destination);
 }

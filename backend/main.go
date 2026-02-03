@@ -29,6 +29,7 @@ func main() {
 
 	// GETS
 	http.HandleFunc("/config/hello_go", web_pkg.HelloGo)
+	http.HandleFunc("/config/rate_limit", web_pkg.GetRateLimit(ctx, client))
 	http.HandleFunc("/config/get_repos", web_pkg.GetRepositories(ctx, db, client, owner))
 	http.HandleFunc("/config/get_default_repository", web_pkg.GetDefaultRepository(ctx, defaultRepository))
 	http.HandleFunc("/config/get_teams", web_pkg.GetTeams(ctx, db, client, owner, defaultRepository))
@@ -40,6 +41,7 @@ func main() {
 	http.HandleFunc("/config/set_repos", web_pkg.SetRepositories(ctx, db))
 	http.HandleFunc("/config/set_teams", web_pkg.SetTeams(ctx, db))
 	http.HandleFunc("/config/set_regex", web_pkg.SetTitleRegex(ctx, db))
+	http.HandleFunc("/config/delete_regex", web_pkg.DeleteTitleRegex(ctx, db))
 
 	cors_handler := web_pkg.EnableCors(http.DefaultServeMux)
 

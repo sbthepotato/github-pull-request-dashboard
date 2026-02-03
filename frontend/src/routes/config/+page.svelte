@@ -1,6 +1,6 @@
 <script>
 	import { page } from "$app/stores";
-
+	import { redirect } from "$lib/index.js";
 	import Button from "../../components/button.svelte";
 	import HelloGo from "./hello_go.svelte";
 	import RepoConfig from "./repo_config.svelte";
@@ -8,8 +8,15 @@
 	import TitleRegexConfig from "./title_regex.svelte";
 	import MemberConfig from "./member_config.svelte";
 	import RepositorySelect from "../../components/repositorySelect.svelte";
+	import RateLimit from "./rate_limit.svelte";
+	import ClientConfig from "./client_config.svelte";
+	import { onMount } from "svelte";
 
 	let repository = "";
+
+	onMount(() => {
+		repository = $page.url.searchParams.get("repo");
+	})
 
 	function handleParams() {
 		repository = $page.url.searchParams.get("repo");
@@ -18,15 +25,29 @@
 	$: $page.url.search, handleParams();
 </script>
 
-<Button to="/">Back to home</Button>
+<Button on:click={() => redirect("/")}>Back to home</Button>
+
+<section>
+	<h2>Client Configuration</h2>
+	<p>
+		Configure settings that will be saved in local storage and will only apply
+		to current client
+	</p>
+	<div class="container">
+		<ClientConfig />
+	</div>
+</section>
 
 <section>
 	<h2>Server Configuration</h2>
-	<div>
-		<RepositorySelect>Select repository to configure</RepositorySelect>
-	</div>
+	<p>
+		Configure settings that will be saved on the server and apply for everyone
+	</p>
 
 	<div class="container">
+		<div class="row">
+		<RepositorySelect>Select repository to configure</RepositorySelect>
+		</div>
 		<TeamConfig {repository} />
 		<MemberConfig {repository} />
 	</div>
@@ -37,6 +58,14 @@
 
 	<div class="container">
 		<TitleRegexConfig />
+	</div>
+</section>
+
+<section>
+	<h2>Debug</h2>
+
+	<div class="container">
+		<RateLimit />
 	</div>
 
 	<div class="container">
@@ -51,9 +80,24 @@
 </footer>
 
 <style>
+	section {
+		background-color: var(--content-bg-alt);
+		border-radius: 16px 16px;
+		padding: 16px 8px;
+		margin: 16px;
+	}
+
 	div.container {
 		display: flex;
 		margin: 8px 4px 48px;
+		padding: 16px 8px;
+		outline: 1px solid var(--border);
+		border-radius: 16px 16px;
+		flex-wrap: wrap;
+	}
+
+	.row {
+		flex: 0 0 100%;
 	}
 
 	footer {

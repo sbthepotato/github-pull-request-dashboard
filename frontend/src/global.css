@@ -26,6 +26,11 @@ html {
 	text-align: center;
 	background: var(--page-bg);
 	color: var(--text);
+	height: 100%;
+}
+
+body {
+	height: 100%;
 }
 
 a {
@@ -108,12 +113,18 @@ code {
 input {
 	background-color: var(--content-bg-alt);
 	color: var(--text);
+	accent-color: var(--border-blue);
 	border: none;
 }
 
 input:focus {
 	outline: none;
 	border: 1px solid var(--border-blue);
+}
+
+ul {
+	list-style: none;
+	text-align: left;
 }
 
 input::-webkit-search-decoration,

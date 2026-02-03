@@ -55,7 +55,7 @@ func processPullRequest(prChannel chan<- *db_pkg.PullRequest,
 	statusApproved := "APPROVED"
 	teamOther := "other"
 
-	if teams == nil || len(teams) == 0 {
+	if len(teams) == 0 {
 		teamOther = "review"
 	}
 
@@ -223,9 +223,15 @@ func processPullRequest(prChannel chan<- *db_pkg.PullRequest,
 		resultPr.Error = &errorMessage
 	}
 
+	resultPr.HtmlTitle = resultPr.Title
 	for _, item := range titleRegexList {
-		re := regexp.MustCompile(*item.RegexPattern)
-		result := re.ReplaceAllString(*resultPr.Title, `<a href="`+*item.Link+`${1}" target="_blank">${0}</a>`)
+		re, err := regexp.Compile(*item.RegexPattern)
+		if err != nil {
+			errorMessage = errorMessage + err.Error()
+			log.Println(errorMessage, err.Error())
+		}
+
+		result := re.ReplaceAllString(*resultPr.HtmlTitle, `<a href="`+*item.Link+`" target="_blank">${0}</a>`)
 		resultPr.HtmlTitle = &result
 	}
 

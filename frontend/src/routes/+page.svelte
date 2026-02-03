@@ -1,8 +1,14 @@
 <script>
 	import { onDestroy, onMount } from "svelte";
 	import { page } from "$app/stores";
-	import { setUrlParam, stringToBool, boolToString } from "$lib/index.js";
-
+	import { browser } from "$app/environment";
+	import {
+		setUrlParam,
+		stringToBool,
+		boolToString,
+		redirect,
+		getPrettyDate,
+	} from "$lib/index.js";
 	import Button from "../components/button.svelte";
 	import Checkbox from "../components/checkbox.svelte";
 	import Searchbar from "../components/searchbar.svelte";
@@ -11,20 +17,27 @@
 	import PRTable from "./pr_table.svelte";
 	import PRAgg from "./pr_aggregation.svelte";
 
+	// variables for showing result
 	let err = "";
 	let result = {};
 	let pr_list = {};
 	let repository = "";
-
 	let loading = false;
 
+	// settings
 	let show_search = false;
+	let tv_mode = false;
+	let total_count = false;
 	let auto_reload = false;
-	let reload_interval;
+	let seamless_reload = false;
+	let last_updated = false;
 
+	// filters and other
+	let reload_interval;
 	let user_filter = "";
 	let user_filter_object = {};
 	let search_query = "";
+	let updated_time;
 
 	onMount(() => {
 		repository = $page.url.searchParams.get("repo");
@@ -40,10 +53,23 @@
 
 		user_filter = $page.url.searchParams.get("user");
 
-		auto_reload = stringToBool(
-			$page.url.searchParams.get("auto_reload"),
-			false,
-		);
+		if (browser) {
+			if (localStorage.getItem("tv_mode") !== null) {
+				tv_mode = true;
+			}
+			if (localStorage.getItem("total_count") !== null) {
+				total_count = true;
+			}
+			if (localStorage.getItem("auto_reload") !== null) {
+				auto_reload = true;
+			}
+			if (localStorage.getItem("seamless_reload") !== null) {
+				seamless_reload = true;
+			}
+			if (localStorage.getItem("last_updated") !== null) {
+				last_updated = true;
+			}
+		}
 
 		show_search = stringToBool(
 			$page.url.searchParams.get("show_search"),
@@ -57,7 +83,9 @@
 
 	async function getPullRequests(refresh, repository) {
 		try {
-			loading = true;
+			if (Object.keys(result).length === 0 || !seamless_reload) {
+				loading = true;
+			}
 			err = "";
 			result = {};
 			pr_list = {};
@@ -73,6 +101,7 @@
 				result = await response.json();
 
 				pr_list = result.pull_requests;
+				updated_time = result.updated;
 			} else {
 				throw new Error(await response.text());
 			}
@@ -83,8 +112,8 @@
 		}
 	}
 
-	function handleSearchbarChange(event) {
-		search_query = event.detail.value.toLowerCase();
+	function handleSearchbarChange(value) {
+		search_query = value.toLowerCase();
 		getFilter();
 	}
 
@@ -103,6 +132,8 @@
 			newRepository !== repository
 		) {
 			repository = newRepository;
+			result = {}
+			updated_time = null
 			getPullRequests(false, repository);
 		}
 	}
@@ -221,29 +252,33 @@
 		setUrlParam("show_search");
 	}
 	$: if (auto_reload) {
-		setUrlParam("auto_reload", "y");
 		reload_interval = setInterval(function () {
 			getPullRequests(false, repository);
 		}, 600000);
 	} else {
-		setUrlParam("auto_reload");
 		clearInterval(reload_interval);
 	}
+	$: handleSearchbarChange(search_query);
 </script>
 
-<section class="pr-table">
+<section class="pr-table" class:tv_mode>
 	{#if err !== ""}
 		{err}
 	{:else if loading}
 		<Loading>Loading PR list...</Loading>
 	{:else}
-		<PRAgg {pr_list} review_teams={result.review_teams} />
+		<PRAgg
+			pr_list={total_count ? result.pull_requests : pr_list}
+			review_teams={result.review_teams} />
 		{#if show_search}
 			<Searchbar
-				value={search_query}
-				placeholder="Search Pull Requests..."
-				on:change={handleSearchbarChange}
-				on:input={handleSearchbarChange} />
+				bind:value={search_query}
+				placeholder="Search Pull Requests..." />
+		{/if}
+		{#if last_updated && updated_time}
+			<p class="last-updated">
+				Lasted updated {getPrettyDate(updated_time, true)}
+			</p>
 		{/if}
 		{#if user_filter === null}
 			<PRTable {pr_list} />
@@ -289,20 +324,36 @@
 </section>
 
 <section class="buttons">
-	<Button color="grey" to="/config">Config</Button>
-	<Button color="blue" on_click={() => getPullRequests(true, repository)}>
+	<Button color="grey" on:click={() => redirect("/config")}>Config</Button>
+	<Button color="blue" on:click={() => getPullRequests(true, repository)}>
 		Refresh PR List
 	</Button>
 	<RepositorySelect />
-	<Checkbox id="auto_reload" bind:checked={auto_reload}>Auto Refresh</Checkbox>
 	<Checkbox id="show_search" bind:checked={show_search}>Show Search</Checkbox>
 	{#if user_filter !== null || search_query !== ""}
-		<Button color="blue" on_click={() => clearFilters()}>Clear Filters</Button>
+		<Button color="blue" on:click={() => clearFilters()}>Clear Filters</Button>
 	{/if}
 </section>
 
 <style>
 	section.pr-table {
 		margin-bottom: 32px;
+	}
+
+	.tv_mode {
+		min-height: 100%;
+	}
+
+	.last-updated {
+		z-index: 1;
+		color: var(--text-alt);
+		background-color: var(--content-bg-alt);
+		border-radius: 8px 0 0 0;
+		font-size: small;
+		padding: 8px;
+		margin: 0;
+		position: fixed;
+		bottom: 0px;
+		right: 0px;
 	}
 </style>

@@ -3,15 +3,16 @@ package db_pkg
 import (
 	"context"
 	"database/sql"
+	"regexp"
+	"strings"
 
 	_ "modernc.org/sqlite"
 )
 
 type TitleRegex struct {
-	TitleRegexId   *int    `json:"title_regex_id,omitempty"`
-	RegexPattern   *string `json:"regex_pattern,omitempty"`
-	Link           *string `json:"link,omitempty"`
-	RepositoryName *string `json:"repository_name,omitempty"`
+	TitleRegexId *int    `json:"title_regex_id,omitempty"`
+	RegexPattern *string `json:"regex_pattern,omitempty"`
+	Link         *string `json:"link,omitempty"`
 }
 
 /**** private ****/
@@ -26,8 +27,20 @@ func initConfigTable(ctx context.Context, db *sql.DB) error {
 		`create table if not exists title_regex (
 			title_regex_id integer primary key not null,
 			regex_pattern text not null,
-			link text not null,
-			repository_name text,
+			link text not null
+		)`,
+	)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.ExecContext(
+		ctx,
+		`create table if not exists title_regex_repository (
+			title_regex_repository_id integer primary key not null,
+			title_regex_id integer not null,
+			repository_name text not null,
+			foreign key (title_regex_id) references title_regex(title_regex_id),
 			foreign key (repository_name) references repository(name)
 		)`,
 	)
@@ -43,7 +56,6 @@ func (titleRegex *TitleRegex) init() {
 	titleRegex.TitleRegexId = new(int)
 	titleRegex.RegexPattern = new(string)
 	titleRegex.Link = new(string)
-	titleRegex.RepositoryName = new(string)
 }
 
 /**** public ****/
@@ -58,17 +70,14 @@ func UpsertTitleRegex(ctx context.Context, db *sql.DB, titleRegexes []*TitleRege
 		`insert into title_regex (
 			title_regex_id,
 			regex_pattern,
-			link,
-			repository_name
+			link
 		) values (
-			?,
 			?,
 			?,
 			?
 		) on conflict (title_regex_id) do update set
 			regex_pattern = excluded.regex_pattern,
-			link = excluded.link,
-			repository_name = excluded.repository_name`)
+			link = excluded.link`)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -77,12 +86,24 @@ func UpsertTitleRegex(ctx context.Context, db *sql.DB, titleRegexes []*TitleRege
 
 	for _, titleRegex := range titleRegexes {
 		if *titleRegex.RegexPattern != "" && *titleRegex.Link != "" {
-			_, err := query.ExecContext(
+
+			_, err := regexp.Compile(*titleRegex.RegexPattern)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+
+			if !strings.HasPrefix(*titleRegex.Link, "https://") {
+				newLink := "https://" + *titleRegex.Link
+				titleRegex.Link = &newLink
+			}
+
+			_, err = query.ExecContext(
 				ctx,
 				titleRegex.TitleRegexId,
 				titleRegex.RegexPattern,
 				titleRegex.Link,
-				titleRegex.RepositoryName)
+			)
 			if err != nil {
 				tx.Rollback()
 				return err
@@ -99,8 +120,7 @@ func GetTitleRegexList(ctx context.Context, db *sql.DB) ([]*TitleRegex, error) {
 		`select
 			title_regex_id,
 			regex_pattern,
-			link,
-			repository_name
+			link
 		from title_regex
 		order by title_regex_id asc`,
 	)
@@ -119,7 +139,6 @@ func GetTitleRegexList(ctx context.Context, db *sql.DB) ([]*TitleRegex, error) {
 			titleRegex.TitleRegexId,
 			titleRegex.RegexPattern,
 			titleRegex.Link,
-			titleRegex.RepositoryName,
 		)
 		if err != nil {
 			return nil, err
@@ -134,4 +153,25 @@ func GetTitleRegexList(ctx context.Context, db *sql.DB) ([]*TitleRegex, error) {
 
 	return result, nil
 
+}
+
+func DeleteTitleRegex(ctx context.Context, db *sql.DB, titleRegexId int) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.QueryContext(ctx, `delete from title_regex_repository where title_regex_id = ?`, titleRegexId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = tx.QueryContext(ctx, `delete from title_regex where title_regex_id = ?`, titleRegexId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
 }

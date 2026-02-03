@@ -1,19 +1,28 @@
 <script>
 	export let checked;
 	export let id = "";
-	export let name = "";
-
-	function handleChange(event) {
-		checked = event.target.checked;
-		const changeEvent = new CustomEvent("change", {
-			detail: { id, checked },
-			bubbles: true,
-		});
-		dispatchEvent(changeEvent);
-	}
+	export let disabled = false;
 </script>
 
-<label>
-	<input type="checkbox" {id} {name} bind:checked on:change={handleChange} />
+<label class:disabled>
+	<input
+		type="checkbox"
+		{id}
+		{disabled}
+		bind:checked
+		on:change
+		class:disabled />
+
 	<slot></slot>
 </label>
+
+<style>
+	label,
+	input {
+		cursor: pointer;
+	}
+
+	.disabled {
+		cursor: not-allowed;
+	}
+</style>

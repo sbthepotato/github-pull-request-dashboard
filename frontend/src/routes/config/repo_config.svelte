@@ -10,10 +10,10 @@
 	let loading = false;
 
 	onMount(() => {
-		getRepos(false);
+		get(false);
 	});
 
-	async function getRepos(refresh) {
+	async function get(refresh) {
 		try {
 			loading = true;
 			repos = [];
@@ -39,7 +39,7 @@
 		}
 	}
 
-	async function setRepos() {
+	async function set() {
 		const data = repos.map((repo) => ({
 			name: repo.name,
 			enabled: repo.enabled,
@@ -78,10 +78,10 @@
 		{:else if repos.length > 0}
 			<ul>
 				{#each repos as repo}
-					<li>
+					<li class:enabled={repo.enabled} class:archived={repo.archived}>
 						<Checkbox
 							id={repo.name}
-							name={repo.name}
+							disabled={repo.archived}
 							bind:checked={repo.enabled}>
 							{repo.name}
 						</Checkbox>
@@ -92,10 +92,10 @@
 			<p>{repos.length} repositories found</p>
 		{/if}
 
-		<Button color="blue" on_click={() => getRepos(true)}>
+		<Button color="blue" on:click={() => get(true)}>
 			Sync repositories with GitHub
 		</Button>
-		<Button color="green" on_click={() => setRepos()}>Save Repositories</Button>
+		<Button color="green" on:click={() => set()}>Save Repositories</Button>
 
 		{#if setResult !== ""}
 			<p>
@@ -111,11 +111,31 @@
 	}
 
 	ul {
-		list-style: none;
-		columns: 3;
+		margin: auto;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-around;
 	}
 
 	li {
-		padding: 12px;
+		margin: 8px;
+		border-radius: 8px;
+		cursor: pointer;
+		min-width: 330px;
+		white-space: nowrap;
+		display: flex;
+		align-items: center;
+		cursor: inherit;
+	}
+
+	li.enabled {
+		font-weight: bold;
+	}
+
+	li.archived {
+		color: var(--yellow);
+		opacity: 50%;
+		cursor: not-allowed;
 	}
 </style>
