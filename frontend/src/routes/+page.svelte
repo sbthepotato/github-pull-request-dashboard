@@ -60,8 +60,10 @@
 			if (localStorage.getItem("total_count") !== null) {
 				total_count = true;
 			}
-			if (localStorage.getItem("auto_reload") !== null) {
-				auto_reload = true;
+			if (localStorage.getItem("auto_refresh") !== null) {
+				reload_interval = setInterval(function () {
+					getPullRequests(false, repository);
+				}, 600000);
 			}
 			if (localStorage.getItem("seamless_reload") !== null) {
 				seamless_reload = true;
@@ -250,13 +252,6 @@
 		setUrlParam("show_search", "y");
 	} else {
 		setUrlParam("show_search");
-	}
-	$: if (auto_reload) {
-		reload_interval = setInterval(function () {
-			getPullRequests(false, repository);
-		}, 600000);
-	} else {
-		clearInterval(reload_interval);
 	}
 	$: handleSearchbarChange(search_query);
 </script>
