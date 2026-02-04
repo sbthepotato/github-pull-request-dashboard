@@ -42,17 +42,6 @@
 	onMount(() => {
 		repository = $page.url.searchParams.get("repo");
 
-		getPullRequests(false, repository);
-
-		// temporary warning because of the rename
-		if ($page.url.searchParams.get("created_by")) {
-			window.alert(
-				"the created by filter has been renamed to user, please delete your current bookmark and make a new one.",
-			);
-		}
-
-		user_filter = $page.url.searchParams.get("user");
-
 		if (browser) {
 			if (localStorage.getItem("tv_mode") !== null) {
 				tv_mode = true;
@@ -60,8 +49,10 @@
 			if (localStorage.getItem("total_count") !== null) {
 				total_count = true;
 			}
-			if (localStorage.getItem("auto_reload") !== null) {
-				auto_reload = true;
+			if (localStorage.getItem("auto_refresh") !== null) {
+				reload_interval = setInterval(function () {
+					getPullRequests(false, repository);
+				}, 360000);
 			}
 			if (localStorage.getItem("seamless_reload") !== null) {
 				seamless_reload = true;
@@ -71,6 +62,9 @@
 			}
 		}
 
+		getPullRequests(false, repository);
+
+		user_filter = $page.url.searchParams.get("user");
 		show_search = stringToBool(
 			$page.url.searchParams.get("show_search"),
 			false,
@@ -87,8 +81,6 @@
 				loading = true;
 			}
 			err = "";
-			result = {};
-			pr_list = {};
 
 			const response = await fetch(
 				"api/dashboard/get_pr_list?refresh=" +
@@ -250,13 +242,6 @@
 		setUrlParam("show_search", "y");
 	} else {
 		setUrlParam("show_search");
-	}
-	$: if (auto_reload) {
-		reload_interval = setInterval(function () {
-			getPullRequests(false, repository);
-		}, 600000);
-	} else {
-		clearInterval(reload_interval);
 	}
 	$: handleSearchbarChange(search_query);
 </script>
