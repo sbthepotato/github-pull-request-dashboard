@@ -52,7 +52,7 @@
 			if (localStorage.getItem("auto_refresh") !== null) {
 				reload_interval = setInterval(function () {
 					getPullRequests(false, repository);
-				}, 600000);
+				}, 360000);
 			}
 			if (localStorage.getItem("seamless_reload") !== null) {
 				seamless_reload = true;
