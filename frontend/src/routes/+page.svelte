@@ -89,8 +89,6 @@
 				loading = true;
 			}
 			err = "";
-			result = {};
-			pr_list = {};
 
 			const response = await fetch(
 				"api/dashboard/get_pr_list?refresh=" +
