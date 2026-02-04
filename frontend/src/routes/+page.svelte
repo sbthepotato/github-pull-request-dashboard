@@ -42,17 +42,6 @@
 	onMount(() => {
 		repository = $page.url.searchParams.get("repo");
 
-		getPullRequests(false, repository);
-
-		// temporary warning because of the rename
-		if ($page.url.searchParams.get("created_by")) {
-			window.alert(
-				"the created by filter has been renamed to user, please delete your current bookmark and make a new one.",
-			);
-		}
-
-		user_filter = $page.url.searchParams.get("user");
-
 		if (browser) {
 			if (localStorage.getItem("tv_mode") !== null) {
 				tv_mode = true;
@@ -73,6 +62,9 @@
 			}
 		}
 
+		getPullRequests(false, repository);
+
+		user_filter = $page.url.searchParams.get("user");
 		show_search = stringToBool(
 			$page.url.searchParams.get("show_search"),
 			false,
