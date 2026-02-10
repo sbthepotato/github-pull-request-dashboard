@@ -228,7 +228,7 @@ func UpsertUserTeams(ctx context.Context, db *sql.DB, userTeams map[string][]*gi
 		?,
 		?,
 		?) on conflict (user_login, repository_name) do update set
-		team_slug = ?`)
+		team_slug = excluded.team_slug`)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -237,7 +237,7 @@ func UpsertUserTeams(ctx context.Context, db *sql.DB, userTeams map[string][]*gi
 
 	for teamSlug, users := range userTeams {
 		for _, user := range users {
-			_, err := query.ExecContext(ctx, user.Login, repositoryName, teamSlug, teamSlug)
+			_, err := query.ExecContext(ctx, user.Login, repositoryName, teamSlug)
 			if err != nil {
 				tx.Rollback()
 				return err

@@ -200,7 +200,7 @@ func UpsertTeamReviews(ctx context.Context, db *sql.DB, teams []*Team) error {
 			?,
 			?
 		) on conflict (team_slug, repository_name) do update set
-			review_order = ?`)
+			review_order = excluded.review_order`)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -208,7 +208,7 @@ func UpsertTeamReviews(ctx context.Context, db *sql.DB, teams []*Team) error {
 	defer query.Close()
 
 	for _, team := range teams {
-		_, err := query.ExecContext(ctx, team.Slug, team.RepositoryName, team.ReviewOrder, team.ReviewOrder)
+		_, err := query.ExecContext(ctx, team.Slug, team.RepositoryName, team.ReviewOrder)
 		if err != nil {
 			tx.Rollback()
 			return err
