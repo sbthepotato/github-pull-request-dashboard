@@ -49,8 +49,8 @@ func GetPullRequests(ctx context.Context, db *sql.DB, c *github.Client, owner st
 
 		if cachedPrListResults == nil ||
 			cachedPrListResults[repo] == nil ||
-			(refresh == "y" && currentTime.Sub(*cachedPrListResults[repo].Updated).Minutes() > 1) ||
-			currentTime.Sub(*cachedPrListResults[repo].Updated).Minutes() > 2 {
+			(refresh == "y" && currentTime.Sub(*cachedPrListResults[repo].Updated).Seconds() > 30) ||
+			currentTime.Sub(*cachedPrListResults[repo].Updated).Minutes() > 1 {
 
 			if cachedPrListResults == nil {
 				cachedPrListResults = make(map[string]*db_pkg.PullRequestInfo)

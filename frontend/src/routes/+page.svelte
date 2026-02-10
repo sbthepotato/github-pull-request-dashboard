@@ -133,7 +133,8 @@
 	function getFilter() {
 		if (
 			(user_filter !== null || search_query !== "") &&
-			result.pull_requests !== undefined
+			result.pull_requests !== undefined &&
+			result.pull_requests.length > 0
 		) {
 			let cleaned_query = "";
 			let anti_search = false;
@@ -170,7 +171,7 @@
 							(review) =>
 								review.state === "REVIEW_REQUESTED" &&
 								review.user?.login.toLowerCase().includes(cleaned_query) &&
-								review.user?.name.toLowerCase().includes(cleaned_query),
+								review.user?.name?.toLowerCase().includes(cleaned_query),
 						) &&
 						!pr.labels?.some((label) =>
 							label.name.toLowerCase().includes(cleaned_query),
@@ -201,7 +202,7 @@
 								(review) =>
 									review.state === "REVIEW_REQUESTED" &&
 									(review.user?.login.toLowerCase().includes(cleaned_query) ||
-										review.user?.name.toLowerCase().includes(cleaned_query)),
+										review.user?.name?.toLowerCase().includes(cleaned_query)),
 							) ||
 							pr.labels?.some((label) =>
 								label.name.toLowerCase().includes(cleaned_query),
