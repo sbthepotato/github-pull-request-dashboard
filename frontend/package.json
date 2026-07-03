@@ -9,6 +9,7 @@
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^7.0.0",
+		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.6.1",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"svelte": "^5",
@@ -16,6 +17,6 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"cookie": "^2.0.1"
+		"cookie": "^0.7.2"
 	}
 }

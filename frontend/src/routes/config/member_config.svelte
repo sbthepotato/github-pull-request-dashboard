@@ -21,7 +21,7 @@
 			result = {};
 
 			const response = await fetch(
-				"api/config/get_users?refresh=" +
+				"/api/config/get_users?refresh=" +
 					boolToString(refresh) +
 					"&type=" +
 					type +
