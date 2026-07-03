@@ -5,6 +5,9 @@
 
 .DS_Store
 
+backend/static/*
+backend/github-pull-request-dashboard
+
 # Logs
 logs
 *.log

@@ -83,7 +83,7 @@
 			err = "";
 
 			const response = await fetch(
-				"api/dashboard/get_pr_list?refresh=" +
+				"/api/dashboard/get_pr_list?refresh=" +
 					boolToString(refresh) +
 					"&repo=" +
 					repository ?? null,

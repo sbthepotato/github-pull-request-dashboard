@@ -9,7 +9,7 @@
 			answer = "";
 			err = "";
 
-			const response = await fetch("api/config/hello_go");
+			const response = await fetch("/api/config/hello_go");
 
 			if (response.ok) {
 				answer = await response.text();

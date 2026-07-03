@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"embed"
+	"io/fs"
 	"log"
 	"net/http"
 
@@ -9,6 +11,9 @@ import (
 	"github-pull-request-dashboard/github_pkg"
 	"github-pull-request-dashboard/web_pkg"
 )
+
+//go:embed all:static
+var staticFiles embed.FS
 
 func main() {
 	ctx := context.Background()
@@ -28,20 +33,42 @@ func main() {
 	}
 
 	// GETS
-	http.HandleFunc("/config/hello_go", web_pkg.HelloGo)
-	http.HandleFunc("/config/rate_limit", web_pkg.GetRateLimit(ctx, client))
-	http.HandleFunc("/config/get_repos", web_pkg.GetRepositories(ctx, db, client, owner))
-	http.HandleFunc("/config/get_default_repository", web_pkg.GetDefaultRepository(ctx, defaultRepository))
-	http.HandleFunc("/config/get_teams", web_pkg.GetTeams(ctx, db, client, owner, defaultRepository))
-	http.HandleFunc("/config/get_users", web_pkg.GetUsers(ctx, db, client, owner, defaultRepository))
-	http.HandleFunc("/config/get_title_regex_list", web_pkg.GetTitleRegexList(ctx, db))
-	http.HandleFunc("/dashboard/get_pr_list", web_pkg.GetPullRequests(ctx, db, client, owner, defaultRepository))
+	http.HandleFunc("/api/config/hello_go", web_pkg.HelloGo)
+	http.HandleFunc("/api/config/rate_limit", web_pkg.GetRateLimit(ctx, client))
+	http.HandleFunc("/api/config/get_repos", web_pkg.GetRepositories(ctx, db, client, owner))
+	http.HandleFunc("/api/config/get_default_repository", web_pkg.GetDefaultRepository(ctx, defaultRepository))
+	http.HandleFunc("/api/config/get_teams", web_pkg.GetTeams(ctx, db, client, owner, defaultRepository))
+	http.HandleFunc("/api/config/get_users", web_pkg.GetUsers(ctx, db, client, owner, defaultRepository))
+	http.HandleFunc("/api/config/get_title_regex_list", web_pkg.GetTitleRegexList(ctx, db))
+	http.HandleFunc("/api/dashboard/get_pr_list", web_pkg.GetPullRequests(ctx, db, client, owner, defaultRepository))
 
 	// POSTS
-	http.HandleFunc("/config/set_repos", web_pkg.SetRepositories(ctx, db))
-	http.HandleFunc("/config/set_teams", web_pkg.SetTeams(ctx, db))
-	http.HandleFunc("/config/set_regex", web_pkg.SetTitleRegex(ctx, db))
-	http.HandleFunc("/config/delete_regex", web_pkg.DeleteTitleRegex(ctx, db))
+	http.HandleFunc("/api/config/set_repos", web_pkg.SetRepositories(ctx, db))
+	http.HandleFunc("/api/config/set_teams", web_pkg.SetTeams(ctx, db))
+	http.HandleFunc("/api/config/set_regex", web_pkg.SetTitleRegex(ctx, db))
+	http.HandleFunc("/api/config/delete_regex", web_pkg.DeleteTitleRegex(ctx, db))
+
+	// Serve embedded frontend static files with SPA fallback
+	staticSubFS, err := fs.Sub(staticFiles, "static")
+	if err != nil {
+		log.Fatalln("Could not create static file system: ", err.Error())
+	}
+	fileServer := http.FileServer(http.FS(staticSubFS))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		if path == "/" {
+			path = "index.html"
+		} else {
+			path = path[1:] // strip leading /
+		}
+		_, err := staticSubFS.Open(path)
+		if err != nil {
+			// SPA fallback: serve index.html for unknown routes
+			http.ServeFileFS(w, r, staticSubFS, "index.html")
+			return
+		}
+		fileServer.ServeHTTP(w, r)
+	})
 
 	cors_handler := web_pkg.EnableCors(http.DefaultServeMux)
 

@@ -21,7 +21,7 @@
 			err = "";
 
 			const response = await fetch(
-				"api/config/get_teams?refresh=" +
+				"/api/config/get_teams?refresh=" +
 					boolToString(refresh) +
 					"&repo=" +
 					repository ?? null,
@@ -51,7 +51,7 @@
 			err = "";
 			result = "";
 
-			const response = await fetch("api/config/set_teams", {
+			const response = await fetch("/api/config/set_teams", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

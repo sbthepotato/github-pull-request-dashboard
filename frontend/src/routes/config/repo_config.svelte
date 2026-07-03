@@ -19,7 +19,7 @@
 			repos = [];
 			err = "";
 
-			let url = "api/config/get_repos";
+			let url = "/api/config/get_repos";
 
 			if (refresh) {
 				url = url + "?refresh=y";
@@ -49,7 +49,7 @@
 			err = "";
 			setResult = "";
 
-			const response = await fetch("api/config/set_repos", {
+			const response = await fetch("/api/config/set_repos", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
