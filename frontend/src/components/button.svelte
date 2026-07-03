@@ -16,6 +16,7 @@
 		border-radius: 8px;
 		font-weight: bold;
 		margin: 4px;
+		transition: all 0.2;
 	}
 
 	button.grey {
@@ -36,5 +37,9 @@
 
 	button:hover {
 		cursor: pointer;
+	}
+
+	button:active {
+		transform: scale(0.95);
 	}
 </style>
