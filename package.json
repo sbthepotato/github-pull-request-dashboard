@@ -10,6 +10,6 @@
 		"backend": "cd backend && go run ."
 	},
 	"devDependencies": {
-		"concurrently": "^9.0.1"
+		"concurrently": "^10.0.3"
 	}
 }
