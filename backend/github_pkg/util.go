@@ -6,7 +6,7 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v81/github"
+	"github.com/google/go-github/v88/github"
 	"github.com/joho/godotenv"
 )
 
@@ -20,8 +20,12 @@ func InitGithubConnection(ctx context.Context) (*github.Client, string, string, 
 		&oauth2.Token{AccessToken: os.Getenv("token")},
 	)
 	tc := oauth2.NewClient(ctx, ts)
+	clientOptions := github.WithHTTPClient(tc)
 
-	client := github.NewClient(tc)
+	client, err := github.NewClient(clientOptions)
+	if err != nil {
+		return nil, "", "", err
+	}
 
 	return client, os.Getenv("owner"), os.Getenv("repo"), nil
 
