@@ -6,6 +6,8 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 
 	"github-pull-request-dashboard/db_pkg"
 	"github-pull-request-dashboard/github_pkg"
@@ -72,9 +74,24 @@ func main() {
 
 	cors_handler := web_pkg.EnableCors(http.DefaultServeMux)
 
-	// Start the server on port 8080
-	log.Println("Starting server on :8080...")
-	if err := http.ListenAndServe(":8080", cors_handler); err != nil {
+	// Used to set base path for subdomains
+	var handler http.Handler = cors_handler
+	if basePath := strings.TrimRight(os.Getenv("base_path"), "/"); basePath != "" {
+		mux := http.NewServeMux()
+		mux.HandleFunc(basePath, func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, basePath+"/", http.StatusMovedPermanently)
+		})
+		mux.Handle(basePath+"/", http.StripPrefix(basePath, cors_handler))
+		handler = mux
+	}
+
+	port := os.Getenv("port")
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Println("Starting server on :" + port + "...")
+	if err := http.ListenAndServe(":"+port, handler); err != nil {
 		log.Fatalln("Could not start server: ", err.Error())
 	}
 }

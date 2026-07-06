@@ -1,4 +1,5 @@
 <script>
+	import { base } from "$app/paths";
 	import Button from "../../components/button.svelte";
 
 	let answer = {};
@@ -24,7 +25,7 @@
 			answer = {};
 			err = "";
 
-			const response = await fetch("/api/config/rate_limit");
+			const response = await fetch(`${base}/api/config/rate_limit`);
 
 			if (response.ok) {
 				answer = await response.json();

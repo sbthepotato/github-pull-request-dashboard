@@ -2,6 +2,7 @@
 	import { onMount } from "svelte";
 	import Button from "../../components/button.svelte";
 	import Loading from "../../components/loading.svelte";
+	import { base } from "$app/paths";
 	import { boolToString } from "$lib/index.js";
 
 	export let repository = "";
@@ -21,7 +22,7 @@
 			err = "";
 
 			const response = await fetch(
-				"/api/config/get_teams?refresh=" +
+				`${base}/api/config/get_teams?refresh=` +
 					boolToString(refresh) +
 					"&repo=" +
 					repository ?? null,
@@ -51,7 +52,7 @@
 			err = "";
 			result = "";
 
-			const response = await fetch("/api/config/set_teams", {
+			const response = await fetch(`${base}/api/config/set_teams`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

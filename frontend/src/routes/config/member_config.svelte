@@ -3,6 +3,7 @@
 	import User from "../../components/user.svelte";
 	import Button from "../../components/button.svelte";
 	import Loading from "../../components/loading.svelte";
+	import { base } from "$app/paths";
 	import { boolToString } from "$lib/index.js";
 
 	export let repository = "";
@@ -21,7 +22,7 @@
 			result = {};
 
 			const response = await fetch(
-				"/api/config/get_users?refresh=" +
+				`${base}/api/config/get_users?refresh=` +
 					boolToString(refresh) +
 					"&type=" +
 					type +

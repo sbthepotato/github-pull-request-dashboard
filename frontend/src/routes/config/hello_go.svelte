@@ -1,4 +1,5 @@
 <script>
+	import { base } from "$app/paths";
 	import Button from "../../components/button.svelte";
 
 	let answer = "";
@@ -9,7 +10,7 @@
 			answer = "";
 			err = "";
 
-			const response = await fetch("/api/config/hello_go");
+			const response = await fetch(`${base}/api/config/hello_go`);
 
 			if (response.ok) {
 				answer = await response.text();

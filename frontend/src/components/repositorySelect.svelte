@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from "svelte";
 	import { page } from "$app/stores";
+	import { base } from "$app/paths";
 	import { setUrlParam } from "$lib/index.js";
 
 	let repos = [];
@@ -20,7 +21,7 @@
 			repos = [];
 			err = "";
 
-			const response = await fetch("/api/config/get_repos?active=y");
+			const response = await fetch(`${base}/api/config/get_repos?active=y`);
 
 			if (response.ok) {
 				repos = await response.json();
@@ -42,7 +43,9 @@
 				err = "";
 				selected = "";
 
-				const response = await fetch("/api/config/get_default_repository");
+				const response = await fetch(
+					`${base}/api/config/get_default_repository`,
+				);
 
 				if (response.ok) {
 					selected = await response.text();
@@ -94,5 +97,4 @@
 	select:focus {
 		cursor: pointer;
 	}
-
 </style>
