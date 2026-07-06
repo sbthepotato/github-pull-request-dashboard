@@ -74,10 +74,7 @@ func main() {
 
 	cors_handler := web_pkg.EnableCors(http.DefaultServeMux)
 
-	// When hosted behind a reverse proxy on a subpath (e.g. /pr/), set
-	// base_path in the .env to that prefix so incoming requests are stripped
-	// down to the routes registered above. Must match the frontend base_path
-	// used at build time. Leave unset when serving from the domain root.
+	// Used to set base path for subdomains
 	var handler http.Handler = cors_handler
 	if basePath := strings.TrimRight(os.Getenv("base_path"), "/"); basePath != "" {
 		mux := http.NewServeMux()
@@ -88,7 +85,6 @@ func main() {
 		handler = mux
 	}
 
-	// Port is configurable via the .env (defaults to 8080).
 	port := os.Getenv("port")
 	if port == "" {
 		port = "8080"
