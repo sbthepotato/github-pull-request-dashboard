@@ -1,5 +1,6 @@
 // place files you want to import through the `$lib` alias in this folder.
 import { goto } from "$app/navigation";
+import { base } from "$app/paths";
 
 const goto_options = {
 	keepFocus: true,
@@ -106,12 +107,9 @@ export function getPrettyDate(date_str, detailed = false) {
 }
 
 export function redirect(destination) {
-	const url_prefix = import.meta.env.VITE_URL_PATH;
 	const params = new URLSearchParams(window.location.search).toString();
 
-	if (url_prefix) {
-		destination = url_prefix + destination;
-	}
+	destination = base + destination;
 
 	return goto(params ? `${destination}?${params}` : destination);
 }
