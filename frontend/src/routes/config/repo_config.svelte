@@ -3,6 +3,7 @@
 	import Button from "../../components/button.svelte";
 	import Checkbox from "../../components/checkbox.svelte";
 	import Loading from "../../components/loading.svelte";
+	import { base } from "$app/paths";
 
 	let repos = [];
 	let setResult = "";
@@ -19,7 +20,7 @@
 			repos = [];
 			err = "";
 
-			let url = "/api/config/get_repos";
+			let url = `${base}/api/config/get_repos`;
 
 			if (refresh) {
 				url = url + "?refresh=y";
@@ -49,7 +50,7 @@
 			err = "";
 			setResult = "";
 
-			const response = await fetch("/api/config/set_repos", {
+			const response = await fetch(`${base}/api/config/set_repos`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

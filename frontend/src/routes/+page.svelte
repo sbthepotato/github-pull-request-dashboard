@@ -2,6 +2,7 @@
 	import { onDestroy, onMount } from "svelte";
 	import { page } from "$app/stores";
 	import { browser } from "$app/environment";
+	import { base } from "$app/paths";
 	import {
 		setUrlParam,
 		stringToBool,
@@ -83,7 +84,7 @@
 			err = "";
 
 			const response = await fetch(
-				"/api/dashboard/get_pr_list?refresh=" +
+				`${base}/api/dashboard/get_pr_list?refresh=` +
 					boolToString(refresh) +
 					"&repo=" +
 					repository ?? null,
@@ -124,8 +125,8 @@
 			newRepository !== repository
 		) {
 			repository = newRepository;
-			result = {}
-			updated_time = null
+			result = {};
+			updated_time = null;
 			getPullRequests(false, repository);
 		}
 	}

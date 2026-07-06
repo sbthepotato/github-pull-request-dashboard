@@ -1,5 +1,6 @@
 <script>
 	import { onMount } from "svelte";
+	import { base } from "$app/paths";
 	import Button from "../../components/button.svelte";
 
 	let temp_id = -100;
@@ -17,7 +18,7 @@
 			resultList = {};
 			err = "";
 
-			const response = await fetch("/api/config/get_title_regex_list");
+			const response = await fetch(`${base}/api/config/get_title_regex_list`);
 
 			if (response.ok) {
 				resultList = await response.json();
@@ -47,7 +48,7 @@
 			err = "";
 			result = "";
 
-			const response = await fetch("/api/config/set_regex", {
+			const response = await fetch(`${base}/api/config/set_regex`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -68,7 +69,7 @@
 
 			if (id > 0) {
 				const response = await fetch(
-					"/api/config/delete_regex?titleRegexId=" + id,
+					`${base}/api/config/delete_regex?titleRegexId=` + id,
 					{
 						method: "POST",
 					},
