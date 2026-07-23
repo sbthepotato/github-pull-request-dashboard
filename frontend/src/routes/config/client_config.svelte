@@ -64,7 +64,7 @@
 			<Checkbox
 				bind:checked={auto_refresh}
 				on:change={() => handleChange("auto_refresh", auto_refresh)}>
-				Automatically refresh dashboard every 6 minutes
+				Automatically refresh dashboard every 4 minutes
 			</Checkbox>
 		</li>
 		<li>
