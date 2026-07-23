@@ -246,7 +246,7 @@ get list of github pull requests and process them with review information
 */
 func GetPullRequests(ctx context.Context, db *sql.DB, c *github.Client, owner string, RepositoryName string, prevResult *db_pkg.PullRequestInfo) (*db_pkg.PullRequestInfo, error) {
 
-	currentTime := time.Now()
+	currentTime := time.Now().Add(-time.Second * 20)
 	result := new(db_pkg.PullRequestInfo)
 	result.Updated = &currentTime
 
