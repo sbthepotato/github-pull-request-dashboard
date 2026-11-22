@@ -24,6 +24,11 @@ func InitDatabase(ctx context.Context) (*sql.DB, error) {
 		return nil, err
 	}
 
+	err = initRepositoryGroupTable(ctx, db)
+	if err != nil {
+		return nil, err
+	}
+
 	err = initTeamTable(ctx, db)
 	if err != nil {
 		return nil, err
